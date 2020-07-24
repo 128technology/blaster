@@ -1,0 +1,10 @@
+{% extends "layout.html" %}
+{% block body %}
+<nav>
+  <h1>ISOs</h1>
+  <ul>
+      <li><a href="{{ url_for('iso.list_available') }}">List Available ISOs</a>
+      <li><a href="{{ url_for('iso.list') }}">List ISOs</a>
+  </ul>
+</nav>
+{% endblock %}

@@ -1,0 +1,11 @@
+{% extends "layout.html" %}
+{% block body %}
+<nav>
+  <h1>Blaster</h1>
+  <ul>
+      <li><a href="{{ url_for('certificate.menu') }}">Manage Certificate</a>
+      <li><a href="{{ url_for('iso.menu') }}">Manage ISOs</a>
+      <li><a href="{{ url_for('conductor.menu') }}">Manage Conductors</a>
+  </ul>
+</nav>
+{% endblock %}

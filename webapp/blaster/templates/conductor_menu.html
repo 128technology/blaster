@@ -1,0 +1,10 @@
+{% extends "layout.html" %}
+{% block body %}
+<nav>
+  <h1>Conductors</h1>
+  <ul>
+      <li><a href="{{ url_for('conductor.list') }}">List Configured Conductors</a>
+      <li><a href="{{ url_for('conductor.add') }}">Add Conductor</a>
+  </ul>
+</nav>
+{% endblock %}

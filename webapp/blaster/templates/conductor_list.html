@@ -1,0 +1,22 @@
+{% extends "layout.html" %}
+{% block body %}
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<nav>
+  <h1>Conductors</h1>
+  <table>
+    <tr>
+      <th>Conductor Name</th>
+      <th>Action</th>
+    </tr>
+{%- for conductor in conductors %}
+    <tr>
+      <td>{{ conductor['name'] }}</td>
+      <td>
+          <a href="{{ url_for('conductor.list_nodes', name=conductor['name']) }}">List Nodes</a><br>
+          <a href="{{ url_for('conductor.delete', name=conductor['name']) }}">Delete</a>
+      </td>
+    </tr>
+{%- endfor %}
+  </table>
+</nav>
+{% endblock %}

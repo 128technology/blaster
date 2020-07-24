@@ -1,0 +1,52 @@
+version: '3.7'
+
+networks:
+  blasting:
+    driver: macvlan
+    driver_opts:
+      parent: ${BLASTING_INTERFACE}
+    ipam:
+      config:
+        - subnet: 192.168.128.0/24
+
+services:
+  dhcp:
+    build: dhcp/
+    image: dhcp
+    ports:
+      - "67:67"
+      - "68:68"
+    networks:
+      blasting:
+        ipv4_address: 192.168.128.2
+  tftp.bios:
+    build: tftp/
+    image: tftp
+    ports:
+      - "69:69"
+    volumes:
+      - ./tftpboot.bios:/var/lib/tftpboot
+    networks:
+      blasting:
+        ipv4_address: 192.168.128.3
+  tftp.uefi:
+    build: tftp/
+    image: tftp
+    ports:
+      - "69:69"
+    volumes:
+      - ./tftpboot.uefi:/var/lib/tftpboot
+    networks:
+      blasting:
+        ipv4_address: 192.168.128.4
+  webapp:
+    build: webapp/
+    image: webapp
+    privileged: true
+    ports:
+      - "80:5000"
+    volumes:
+      - ./tftpboot.bios:/opt/tftpboot.bios
+      - ./tftpboot.uefi:/opt/tftpboot.uefi
+      - ./instance:/opt/instance
+      - ./images:/opt/images

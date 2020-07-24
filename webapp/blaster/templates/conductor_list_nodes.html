@@ -1,0 +1,23 @@
+{% extends "layout.html" %}
+{% block body %}
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<nav>
+  <h1>Conductors</h1>
+  <table>
+    <tr>
+      <th>Router Name</th>
+      <th>Node Name</th>
+      <th>Action</th>
+    </tr>
+{%- if nodes %}
+{%- for node in nodes %}
+    <tr>
+      <td>{{ node[0] }}</td>
+      <td>{{ node[1] }}</td>
+      <td></td>
+    </tr>
+{%- endfor %}
+{%- endif %}
+  </table>
+</nav>
+{% endblock %}

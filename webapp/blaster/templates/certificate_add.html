@@ -1,0 +1,13 @@
+{% extends "layout.html" %}
+{% block body %}
+<nav>
+<h1>Certificates</h1>
+<h2>Add New Certificate</h2>
+<form method="post" enctype=multipart/form-data>
+  <label for="cert">Certificate</label>
+  <input type="file" name="file">
+  <br>
+  <input type="submit" value="upload">
+</form>
+</nav>
+{% endblock %}

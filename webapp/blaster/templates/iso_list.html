@@ -1,0 +1,30 @@
+{% extends "layout.html" %}
+{% block body %}
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<nav>
+  <h1>ISOs</h1>
+  <table>
+    <tr>
+      <th>ISO Name</th>
+      <th>Status</th>
+      <th>Active</th>
+      <th>Action</th>
+    </tr>
+{%- for iso in isos %}
+    <tr>
+      <td>{{ iso['name'] }}</td>
+      <td>{{ iso_status[iso['status_id']] }}</td>
+      <td>{% if active == iso['name'] %}X{% endif %}</td>
+      <td>
+          <a href="{{ url_for('iso.delete', name=iso['name']) }}">Delete</a>
+              {% if active != iso['name'] %}
+          {% if iso['status_id'] == 2 %}
+          &nbsp<a href="{{ url_for('iso.update_active', name=iso['name']) }}">Set as Active</a>
+              {% endif %}
+          {% endif %}
+      </td>
+    </tr>
+{%- endfor %}
+  </table>
+</nav>
+{% endblock %}

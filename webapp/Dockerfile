@@ -1,0 +1,33 @@
+FROM centos:7
+
+RUN yum -y install epel-release
+RUN yum -y install python3 openssl redis nfs-utils
+
+ENV VIRTUAL_ENV=/opt/venv
+RUN python3 -m venv $VIRTUAL_ENV
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+
+COPY run.py /opt/
+RUN mkdir /opt/blaster/
+COPY blaster/ /opt/blaster/
+COPY celery_worker.py /opt/
+COPY celery.service /etc/systemd/system/
+RUN mkdir /etc/conf.d
+COPY conf.d-celery /etc/conf.d/celery
+COPY webapp.service /etc/systemd/system
+
+RUN systemctl enable celery
+RUN systemctl enable webapp
+RUN systemctl enable redis
+RUN systemctl enable nfs
+
+ENV LC_ALL=en_US.UTF-8
+ENV FLASK_APP="blaster.factory"
+
+VOLUME /opt/instance/
+VOLUME /opt/images/
+VOLUME ["/sys/fs/cgroup"]
+ENTRYPOINT ["/usr/sbin/init"]

@@ -1,0 +1,14 @@
+{% extends "layout.html" %}
+{% block body %}
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<nav>
+  <h1>Certificates</h1>
+{% if cert_info %}
+{% for row in cert_info %}
+{{ row }}<br>
+{% endfor %}
+{% else %}
+No Certificate Found
+{% endif %}
+</nav>
+{% endblock %}

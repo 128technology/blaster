@@ -1,0 +1,10 @@
+[Unit]
+Description=Blaster Webapp Service
+After=network.target
+
+[Service]
+WorkingDirectory=/opt/blaster
+ExecStart=/opt/venv/bin/python /opt/run.py --serve-in-foreground
+
+[Install]
+WantedBy=multi-user.target

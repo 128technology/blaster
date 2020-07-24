@@ -1,0 +1,19 @@
+{% extends "layout.html" %}
+{% block body %}
+<H1>Add new Conductor</H1>
+<form method="post" enctype=multipart/form-data>
+  <label for="name">Conductor Name</label>
+  <input type="text" name="name">
+  <br>
+  <label for="url">Conductor Url</label>
+  <input type="text" name="url">
+  <br>
+  <label for="username">Conductor Username</label>
+  <input type="text" name="username">
+  <br>
+  <label for="password">Conductor Password</label>
+  <input type="password" name="password">
+  <br>
+  <input type="submit" value="Add">
+</form>
+{% endblock %}

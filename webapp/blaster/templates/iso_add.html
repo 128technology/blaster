@@ -1,0 +1,12 @@
+{% extends "layout.html" %}
+{% block body %}
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<nav>
+  <h1>ISOs</h1>
+  <ul>
+{%- for image in images %}
+      <li><a href="{{ url_for('iso.add', name=image) }}">{{ image }}</a>
+{%- endfor %}
+  </ul>
+</nav>
+{% endblock %}
