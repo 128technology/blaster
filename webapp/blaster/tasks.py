@@ -75,7 +75,7 @@ def setup_image(name):
 
     print(f"Writing UEFI pxelinux config for {name}")
     with open(uefi_pxelinux_dir / name, "w+") as fh:
-        fh.writelines(["default menu.c32\n",
+        fh.writelines([f"default {name}\n",
                        "timeout 30\n",
                        "\n",
                        "display boot.msg\n",
@@ -95,7 +95,7 @@ def setup_image(name):
 
     print(f"Writing BIOS pxelinux config for {name}")
     with open(bios_pxelinux_dir / name, "w+") as fh:
-        fh.writelines(["default menu.c32\n",
+        fh.writelines([f"default {name}\n",
                        "timeout 30\n",
                        "\n",
                        "display boot.msg\n",
