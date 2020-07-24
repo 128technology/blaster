@@ -38,7 +38,7 @@ chmod +x /usr/local/bin/docker-compose
 ```
 
 ### Setup the environment file for variables  ###
-Please create a file called `variables.env` in the root directory of the repo.  Its contents should resemble:
+Please create a file called `.env` in the root directory of the repo.  Its contents should resemble:
 ```
 BLASTING_INTERFACE=XXX
 ```
