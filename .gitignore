@@ -15,4 +15,7 @@ build/
 
 *.sqlite
 *.pem
-variables.env
+.env
+
+images/
+pxelinux.cfg/
