@@ -43,8 +43,7 @@ services:
     build: webapp/
     image: webapp
     privileged: true
-    ports:
-      - "80:5000"
+    network_mode: host
     volumes:
       - ./tftpboot.bios:/opt/tftpboot.bios
       - ./tftpboot.uefi:/opt/tftpboot.uefi
