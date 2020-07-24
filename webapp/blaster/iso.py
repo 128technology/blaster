@@ -118,10 +118,10 @@ def get_active():
     active = bios_active
 
     # Remove any dangling links
-    if bios_active and not os.path.exists(pathlib.Path(constants.BIOS_TFTPBOOT_DIR) / bios_active):
+    if bios_active and not os.path.exists(pathlib.Path(constants.BIOS_TFTPBOOT_DIR) / "pxelinux.cfg" / bios_active):
         os.remove(pathlib.Path(constants.BIOS_TFTPBOOT_DIR) / "pxelinux.cfg" / "default")
         active = None
-    if uefi_active and not os.path.exists(pathlib.Path(constants.UEFI_TFTPBOOT_DIR) / uefi_active):
+    if uefi_active and not os.path.exists(pathlib.Path(constants.UEFI_TFTPBOOT_DIR) / "pxelinux.cfg" / uefi_active):
         os.remove(pathlib.Path(constants.UEFI_TFTPBOOT_DIR) / "pxelinux.cfg" / "default")
         active = None
 
