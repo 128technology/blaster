@@ -41,6 +41,12 @@ def setup_image(name):
     # Make sure nothing is already mounted here
     os.system('umount /mnt')
 
+    # Make sure destination doesn't exist
+    try:
+        os.rmdir(nfs_dir)
+    except FileNotFoundError:
+        pass
+
     try:
         os.system(f"mount -o loop {iso_file} /mnt")
         shutil.copytree('/mnt/', nfs_dir)
@@ -75,7 +81,7 @@ def setup_image(name):
 
     print(f"Writing UEFI pxelinux config for {name}")
     with open(uefi_pxelinux_dir / name, "w+") as fh:
-        fh.writelines([f"default {name}\n",
+        fh.writelines(["UI menu.c32\n",
                        "timeout 30\n",
                        "\n",
                        "display boot.msg\n",
@@ -84,9 +90,9 @@ def setup_image(name):
                        "\n",
                       f"label {name}\n",
                       f"  kernel images/{name}/vmlinuz\n",
-                      f"  append initrd=images/{name}/initrd.img "
-                      f"inst.stage2=nfs:192.168.128.128:{ pathlib.Path(constants.IMAGE_FOLDER) / name } "
-                      f"inst.ks=nfs:192.168.128.128:{ pathlib.Path(constants.IMAGE_FOLDER) / name }/ks.cfg "
+                      f"  append initrd=http://{constants.UEFI_IP}/images/{name}/initrd.img "
+                      f"inst.stage2=nfs:{constants.NFS_IP}:{ pathlib.Path(constants.IMAGE_FOLDER) / name } "
+                      f"inst.ks=nfs:{constants.NFS_IP}:{ pathlib.Path(constants.IMAGE_FOLDER) / name }/ks.cfg "
                        "console=ttyS0,115200n81\n",
                      ])
 
@@ -104,9 +110,9 @@ def setup_image(name):
                        "\n",
                       f"label {name}\n",
                       f"  kernel images/{name}/vmlinuz\n",
-                      f"  append initrd=images/{name}/initrd.img "
-                      f"inst.stage2=nfs:192.168.128.128:{ pathlib.Path(constants.IMAGE_FOLDER) / name } "
-                      f"inst.ks=nfs:192.168.128.128:{ pathlib.Path(constants.IMAGE_FOLDER) / name }/ks.cfg "
+                      f"  append initrd=http://{constants.BIOS_IP}images/{name}/initrd.img "
+                      f"inst.stage2=nfs:{constants.NFS_IP}:{ pathlib.Path(constants.IMAGE_FOLDER) / name } "
+                      f"inst.ks=nfs:{constants.NFS_IP}:{ pathlib.Path(constants.IMAGE_FOLDER) / name }/ks.cfg "
                        "console=ttyS0,115200n81\n",
                      ])
 
