@@ -22,6 +22,7 @@ services:
   tftp.bios:
     build: tftp/
     image: tftp
+    privileged: true
     ports:
       - "69:69"
     volumes:
@@ -32,6 +33,7 @@ services:
   tftp.uefi:
     build: tftp/
     image: tftp
+    privileged: true
     ports:
       - "69:69"
     volumes:
@@ -48,4 +50,5 @@ services:
       - ./tftpboot.bios:/opt/tftpboot.bios
       - ./tftpboot.uefi:/opt/tftpboot.uefi
       - ./instance:/opt/instance
+      - ./instance/exports:/etc/exports
       - ./images:/opt/images
