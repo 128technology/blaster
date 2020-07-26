@@ -51,9 +51,12 @@ docker-compose up -d
 ```
 
 ### Initialize the DB ###
-The first time you setup the blaster on a host machine, you need to initialize the DB.  This can be done with the following command:
+The first time you setup the blaster on a host machine, you need to initialize the DB.  This can be done with the following commands:
 ```
-docker exec blaster_webapp_1 flask init-db
+docker exec -it blaster_webapp_1 bash
+cd /opt
+flask init-db
+exit
 ```
 
 ## Upgrading the Blaster ##
