@@ -44,9 +44,24 @@ BLASTING_INTERFACE=XXX
 ```
 Where `XXX` is the name of the Linux interface connected to the `192.168.128.0/24` network.
 
-### Bring up the monitoring server ###
+### Bring up the blaster ###
 Use docker-compose to build the monitoring server by running the following command:
 ```
+docker-compose up -d
+```
+
+### Initialize the DB ###
+The first time you setup the blaster on a host machine, you need to initialize the DB.  This can be done with the following command:
+```
+docker exec blaster_webapp_1 flask init-db
+```
+
+## Upgrading the Blaster ##
+If new updates are available in the git repo, the following steps can be used to update your blaster:
+```
+git pull origin master
+docker-compose down
+docker-compose build
 docker-compose up -d
 ```
 
