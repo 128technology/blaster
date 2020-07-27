@@ -104,7 +104,7 @@ def setup_image(name):
                        "\n",
                       f"label {name}\n",
                       f"  kernel images/{name}/vmlinuz\n",
-                      f"  append initrd=http://{constants.BIOS_IP}images/{name}/initrd.img "
+                      f"  append initrd=images/{name}/initrd.img "
                       f"inst.stage2=nfs:{constants.NFS_IP}:{ pathlib.Path(constants.IMAGE_FOLDER) / name } "
                       f"inst.ks=nfs:{constants.NFS_IP}:{ pathlib.Path(constants.IMAGE_FOLDER) / name }/ks.cfg "
                        "console=ttyS0,115200n81\n",
