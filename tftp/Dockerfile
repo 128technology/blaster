@@ -3,7 +3,8 @@ FROM centos:7
 RUN yum -y install epel-release
 RUN yum -y install tftp-server lighttpd
 
-RUN systemctl enable tftp
+RUN systemctl enable tftp.service
+RUN systemctl enable tftp.socket
 RUN systemctl enable lighttpd
 
 RUN usermod -G root lighttpd
