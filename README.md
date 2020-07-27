@@ -11,7 +11,7 @@ This software is provided as a 128T Community supported application and is not m
 The above drawing illustrates the architecture of the Blaster.  The blasting server will need a minimum of two interfaces.  The first interface needs to be configured to connect into an existing LAN for management.  This LAN will need access out to the public Internet in order to obtain official 128T ISOs from the 128T yum servers and also to optionally obtain quickstart files from 128T Conductors.  The second interface needs to be connected to a dedicated switch or VLAN used exclusively for blasting purposes.
 
 ## Server Setup ##
-The minimum requirements for the blaster server are 2 cores and 4GB RAM.
+The minimum requirements for the blaster server are 2 cores and 4GB RAM.  It is possible to run the blaster virtualized, but additional considerations need to be made.  The docker containers each use a unique MAC address which may conflict with a hypervisor's port security.  In this case, port security features must be disabled and potentially promiscuous mode turned on in the hypervisor's settings.  Additionally, the Linux OS for the guest may need promiscuous mode enabled on the second interface.
 
 These instructions are based on a host system installed from a CentOS 1804 image.  Other Linux OS variants should be usable provided the setup instructions are modified appropriately.  The blasting interface must be configured with the static IP address of `192.168.128.128/24`.  Any software firewalls should be disabled on the blasting interface and set to allow HTTP and SSH traffic in on the management interface.
 
