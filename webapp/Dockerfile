@@ -1,7 +1,7 @@
 FROM centos:7
 
 RUN yum -y install epel-release
-RUN yum -y install python3 openssl redis nfs-utils
+RUN yum -y install python3 openssl redis nfs-utils xorriso
 
 ENV VIRTUAL_ENV=/opt/venv
 RUN python3 -m venv $VIRTUAL_ENV

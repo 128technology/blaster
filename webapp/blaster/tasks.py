@@ -9,7 +9,7 @@ from blaster import constants
 
 celery = Celery('tasks', broker='redis://localhost:6379/0')
 
-@celery.task(time_limit=600)
+@celery.task(time_limit=1800)
 def setup_image(name):
     print(f"Adding ISO {name} to DB")
     db = get_db()
@@ -38,9 +38,6 @@ def setup_image(name):
     with open(iso_file, 'wb+') as iso:
         iso.write(resp.content)
 
-    # Make sure nothing is already mounted here
-    os.system('umount /mnt')
-
     # Make sure destination doesn't exist
     try:
         os.rmdir(nfs_dir)
@@ -48,16 +45,13 @@ def setup_image(name):
         pass
 
     try:
-        os.system(f"mount -o loop {iso_file} /mnt")
-        shutil.copytree('/mnt/', nfs_dir)
-        os.system('umount /mnt')
+        os.system(f"osirrox -indev {iso_file} -extract / {nfs_dir}")
         with open('/etc/exports', 'a') as fh:
             fh.write(f"{nfs_dir} 192.168.128.0/24(rw,async,no_root_squash)\n")
         os.system('exportfs -ra')
     except OSError:
         print(f"There was an error when attempting to setup the NFS share for {name}")
         update_db_failed(name)
-        os.system('umount /mnt')
         return False
 
     uefi_image_dir = pathlib.Path(constants.UEFI_TFTPBOOT_DIR) / "images" / name
