@@ -1,0 +1,10 @@
+{% extends "layout.html" %}
+{% block body %}
+<nav>
+  <h1>Quickstarts</h1>
+  <ul>
+      <li><a href="{{ url_for('manage_quickstart.add') }}">Add Quickstart</a>
+      <li><a href="{{ url_for('manage_quickstart.list') }}">List Quickstarts</a>
+  </ul>
+</nav>
+{% endblock %}

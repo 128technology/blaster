@@ -1,0 +1,33 @@
+{% extends "layout.html" %}
+{% block body %}
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<nav>
+  <h1>Quickstarts</h1>
+  <table>
+    <tr>
+      <th>Conductor</th>
+      <th>Router</th>
+      <th>Node</th>
+      <th>Description</th>
+      <th>Default</th>
+      <th>Actions</th>
+    </tr>
+{%- for quickstart in quickstarts %}
+    <tr>
+      <td>{{ quickstart['conductor_name'] }}</td>
+      <td>{{ quickstart['router_name'] }}</td>
+      <td>{{ quickstart['node_name'] }}</td>
+      <td>{{ quickstart['description'] }}</td>
+      <td>{% if quickstart['default_quickstart']|int > 0 %}X{% endif %}</td>
+      <td>
+          <a href="{{ url_for('manage_quickstart.delete', id=quickstart['id']) }}">Delete</a>
+          {% if quickstart['default_quickstart']|int == 0 %}
+          &nbsp
+          <a href="{{ url_for('manage_quickstart.set_as_default', id=quickstart['id']) }}">Set as Default</a>
+          {% endif %}
+      </td>
+    </tr>
+{%- endfor %}
+  </table>
+</nav>
+{% endblock %}
