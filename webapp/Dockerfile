@@ -10,6 +10,9 @@ ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 
+# Disable NFSv4 since that seems to be causing a problem
+RUN sed -i 's/RPCNFSDARGS.*/RPCNFSDARGS="--no-nfs-version 4"/' /etc/sysconfig/nfs
+
 COPY run.py /opt/
 RUN mkdir /opt/blaster/
 COPY blaster/ /opt/blaster/
