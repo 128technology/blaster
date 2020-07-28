@@ -46,8 +46,11 @@ def setup_image(name):
 
     try:
         os.system(f"osirrox -indev {iso_file} -extract / {nfs_dir}")
-        with open('/etc/exports', 'a') as fh:
-            fh.write(f"{nfs_dir} 192.168.128.0/24(rw,async,no_root_squash)\n")
+
+        # If it's already in here, don't re-add it
+        if os.system(f"grep {name} /etc/exports") > 0:
+            with open('/etc/exports', 'a') as fh:
+                fh.write(f"{nfs_dir} 192.168.128.0/24(fsid=0,no_root_squash)\n")
         os.system('exportfs -ra')
     except OSError:
         print(f"There was an error when attempting to setup the NFS share for {name}")
