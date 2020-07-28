@@ -13,12 +13,7 @@ services:
   dhcp:
     build: dhcp/
     image: dhcp
-    ports:
-      - "67:67"
-      - "68:68"
-    networks:
-      blasting:
-        ipv4_address: 192.168.128.2
+    network_mode: host
   tftp.bios:
     build: tftp/
     image: tftp
