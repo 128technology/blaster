@@ -31,10 +31,13 @@ CREATE TABLE conductor (
 
 CREATE TABLE quickstart (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
-  conductor_id INTEGER NOT NULL,
-  router_name TEXT NOT NULL,
-  node_name TEXT NOT NULL,
-  FOREIGN KEY (conductor_id) REFERENCES conductor (id)
+  conductor_name TEXT,
+  router_name TEXT,
+  node_name TEXT,
+  description TEXT,
+  quickstart_data TEXT,
+  password TEXT,
+  default_quickstart INT DEFAULT 0 NOT NULL
 );
 
 CREATE TABLE node (
