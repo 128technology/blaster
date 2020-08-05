@@ -8,6 +8,7 @@
       <th>Conductor</th>
       <th>Router</th>
       <th>Node</th>
+      <th>Asset</th>
       <th>Description</th>
       <th>Default</th>
       <th>Actions</th>
@@ -17,13 +18,22 @@
       <td>{{ quickstart['conductor_name'] }}</td>
       <td>{{ quickstart['router_name'] }}</td>
       <td>{{ quickstart['node_name'] }}</td>
+      <td>{% if quickstart['asset_id'] %}{{ quickstart['asset_id'] }}{% endif %}</td>
       <td>{{ quickstart['description'] }}</td>
       <td>{% if quickstart['default_quickstart']|int > 0 %}X{% endif %}</td>
       <td>
           <a href="{{ url_for('manage_quickstart.delete', id=quickstart['id']) }}">Delete</a>
-          {% if quickstart['default_quickstart']|int == 0 %}
+          {% if quickstart['default_quickstart']|int == 0 and quickstart['asset_id'] == None %}
           &nbsp
           <a href="{{ url_for('manage_quickstart.set_as_default', id=quickstart['id']) }}">Set as Default</a>
+          {% endif %}
+          {% if quickstart['default_quickstart']|int > 0 %}
+          &nbsp
+          <a href="{{ url_for('manage_quickstart.clear_default', id=quickstart['id']) }}">
+          {% endif %}
+          {% if quickstart['asset_id'] %}
+          &nbsp
+          <a href="{{ url_for('manage_quickstart.remove_asset', id=quickstart['id']) }}">
           {% endif %}
       </td>
     </tr>

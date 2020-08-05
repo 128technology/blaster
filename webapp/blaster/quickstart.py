@@ -16,8 +16,12 @@ def instantiate(instance=None):
     default_row = db.execute('SELECT quickstart_data, password FROM quickstart where default_quickstart > 0').fetchone()
     if default_row:
         response = {}
-        response['quickstart'] = default_row['quickstart_data']
-        response['password'] = default_row['password']
+        response['quickstart'] = {
+            'a': default_row['asset_id'],
+            'n': default_row['node_name'],
+            'c': default_row['config']
+        }
+        response['password'] = None
         return jsonify(response)
     else:
         return jsonify(error="Not Found"), 404

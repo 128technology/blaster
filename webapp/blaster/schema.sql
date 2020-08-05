@@ -34,9 +34,9 @@ CREATE TABLE quickstart (
   conductor_name TEXT,
   router_name TEXT,
   node_name TEXT,
+  asset_id TEXT,
+  config TEXT,
   description TEXT,
-  quickstart_data TEXT,
-  password TEXT,
   default_quickstart INT DEFAULT 0 NOT NULL
 );
 
