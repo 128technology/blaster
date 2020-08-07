@@ -11,18 +11,15 @@
       <th>Router Name</th>
       <th>Node Name</th>
       <th>Asset ID</th>
-      <th>Action</th>
     </tr>
 {%- for node in nodes %}
     <tr>
       <td>{{ node['identifier'] }}</td>
-      <td>{{ node['name'] }}</td>
-      <td>{{ node['conductor_name'] }}</td>
-      <td>{{ node['router_name'] }}</td>
-      <td>{{ node['node_name'] }}</td>
-      <td>{{ node['asset_id'] }}</td>
-      <td>
-      </td>
+      <td>{% if node['name'] %}{{ node['name'] }}{% endif %}</td>
+      <td>{% if node['conductor_name'] %}{{ node['conductor_name'] }}{% endif %}</td>
+      <td>{% if node['router_name'] %}{{ node['router_name'] }}{% endif %}</td>
+      <td>{% if node['node_name'] %}{{ node['node_name'] }}{% endif %}</td>
+      <td>{% if node['asset_id'] %}{{ node['asset_id'] }}{% endif %}</td>
     </tr>
 {%- endfor %}
   </table>
