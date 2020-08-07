@@ -13,15 +13,21 @@ bp = Blueprint('quickstart', __name__, url_prefix='/quickstart')
 @bp.route('/<instance>')
 def instantiate(instance=None):
     db = get_db()
-    default_row = db.execute('SELECT quickstart_data, password FROM quickstart where default_quickstart > 0').fetchone()
-    if default_row:
-        response = {}
-        response['quickstart'] = {
-            'a': default_row['asset_id'],
-            'n': default_row['node_name'],
-            'c': default_row['config']
-        }
-        response['password'] = None
-        return jsonify(response)
+
+    node_row = db.execute('SELECT quickstart_id from node WHERE identifier = ?', (instance,)).fetchone()
+    if node_row is None:
+        qs_row = db.execute('SELECT node_name, asset_id, config FROM quickstart WHERE default_quickstart > 0').fetchone()
     else:
-        return jsonify(error="Not Found"), 404
+        qs_row = db.execute('SELECT node_name, asset_id, config FROM quickstart WHERE id = ?', (node_row['quickstart_id'],)).fetchone()
+
+    if qs_row is None:
+        return jsonify(error="Could not find a specific or default quickstart"), 404
+
+    response = {}
+    response['quickstart'] = {
+        'a': qs_row['asset_id'],
+        'n': qs_row['node_name'],
+        'c': qs_row['config']
+    }
+    response['password'] = None
+    return jsonify(response)
