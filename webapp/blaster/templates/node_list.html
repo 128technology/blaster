@@ -1,0 +1,30 @@
+{% extends "layout.html" %}
+{% block body %}
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<nav>
+  <h1>Nodes</h1>
+  <table>
+    <tr>
+      <th>Hardware Identifier</th>
+      <th>ISO Name</th>
+      <th>Conductor Name</th>
+      <th>Router Name</th>
+      <th>Node Name</th>
+      <th>Asset ID</th>
+      <th>Action</th>
+    </tr>
+{%- for node in nodes %}
+    <tr>
+      <td>{{ node['identifier'] }}</td>
+      <td>{{ node['name'] }}</td>
+      <td>{{ node['conductor_name'] }}</td>
+      <td>{{ node['router_name'] }}</td>
+      <td>{{ node['node_name'] }}</td>
+      <td>{{ node['asset_id'] }}</td>
+      <td>
+      </td>
+    </tr>
+{%- endfor %}
+  </table>
+</nav>
+{% endblock %}

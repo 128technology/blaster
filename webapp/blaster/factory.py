@@ -42,6 +42,9 @@ def create_app(app_name=PKG_NAME, **kwargs):
     from . import quickstart
     app.register_blueprint(quickstart.bp)
 
+    from . import node
+    app.register_blueprint(node.bp)
+
     # This is ugly but it seems like NFS gives us problems
     # after a container rebuild until we restart it
     os.system("systemctl restart nfs")
