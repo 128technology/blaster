@@ -29,11 +29,11 @@
           {% endif %}
           {% if quickstart['default_quickstart']|int > 0 %}
           &nbsp
-          <a href="{{ url_for('manage_quickstart.clear_default', id=quickstart['id']) }}">
+          <a href="{{ url_for('manage_quickstart.clear_default', id=quickstart['id']) }}">Unset as Default</a>
           {% endif %}
           {% if quickstart['asset_id'] %}
           &nbsp
-          <a href="{{ url_for('manage_quickstart.remove_asset', id=quickstart['id']) }}">
+          <a href="{{ url_for('manage_quickstart.remove_asset', id=quickstart['id']) }}">Remove Asset ID</a>
           {% endif %}
       </td>
     </tr>
