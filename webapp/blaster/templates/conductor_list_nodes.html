@@ -7,15 +7,21 @@
     <tr>
       <th>Router Name</th>
       <th>Node Name</th>
+      <th>Asset ID</th>
       <th>Action</th>
     </tr>
 {%- if nodes %}
 {%- for node in nodes %}
+{%-     if node['role'] != 'conductor' %}
     <tr>
-      <td>{{ node[0] }}</td>
-      <td>{{ node[1] }}</td>
-      <td></td>
+      <td>{{ node['router']['name'] }}</td>
+      <td>{{ node['name'] }}</td>
+      <td>{{ node['assetId'] }}</td>
+      <td>
+          <a href="{{ url_for('conductor.get_quickstart', conductor=conductor, router=node['router']['name'], node=node['name'], assetId=node['assetId']) }}">Download Quickstart</a>
+      </td>
     </tr>
+{%-    endif %}
 {%- endfor %}
 {%- endif %}
   </table>
