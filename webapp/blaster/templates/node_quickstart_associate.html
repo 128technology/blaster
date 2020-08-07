@@ -11,7 +11,9 @@
     <label for="identifier">Choose a blasted Node:</label>
     <select name="identifier" id="indentifier">
 {%- for node in nodes %}
+{%-     if not node['quickstart_id'] %}
       <option value="{{ node['identifier'] }}">{{ node['identifier'] }}</option>
+{%-     endif %}
 {%- endfor %}
     </select>
     <br>

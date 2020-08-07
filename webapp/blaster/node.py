@@ -53,5 +53,5 @@ def associate():
         return redirect(request.url)
 
     quickstarts = db.execute('SELECT id, conductor_name, node_name, router_name FROM quickstart').fetchall()
-    nodes = db.execute('SELECT identifier from node').fetchall()
+    nodes = db.execute('SELECT identifier, quickstart_id from node').fetchall()
     return render_template('node_quickstart_associate.html', quickstarts=quickstarts, nodes=nodes)
