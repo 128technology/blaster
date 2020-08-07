@@ -45,6 +45,7 @@ CREATE TABLE node (
   identifier TEXT NOT NULL,
   quickstart_id INTEGER,
   iso_id INTEGER,
+  validation_report TEXT,
   FOREIGN KEY (quickstart_id) REFERENCES quickstart (id),
   FOREIGN KEY (iso_id) REFERENCES iso (id)
 );
