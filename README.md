@@ -15,6 +15,12 @@ The minimum requirements for the blaster server are 2 cores and 4GB RAM.  It is 
 
 These instructions are based on a host system installed from a CentOS 1804 image.  Other Linux OS variants should be usable provided the setup instructions are modified appropriately.  The blasting interface must be configured with the static IP address of `192.168.128.128/24`.  Any software firewalls should be disabled on the blasting interface and set to allow HTTP and SSH traffic in on the management interface.
 
+Please ensure that the server is not running the rpcbind service as this will conflict with the NFS capabilities of the blaster.
+```
+systemctl stop rpcbind
+systemctl disable rpcbind
+```
+
 The blaster software is distributed through git and installed through docker.  The following sections should be run as root
 
 ### Install docker and docker compose ###
