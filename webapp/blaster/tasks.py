@@ -113,6 +113,12 @@ def setup_image(name):
                        "console=ttyS0,115200n81\n",
                      ])
 
+    print(f"Appending new post section to kickstart to post identifier after blast")
+    with open(nfs_dir / 'ks.cfg', 'a') as fh:
+        fh.writelines(['%post',
+                       'curl -XPOST http://192.168.128.128/node/add/`dmidecode --string system-serial-number`',
+                       '%end'])
+
     print(f"Image {name} appears to have been setup correctly, updating DB")
     db.execute('UPDATE iso SET status_id = ? WHERE name = ?', (2, name))
     db.commit()
