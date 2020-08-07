@@ -12,6 +12,8 @@ import os
 import re
 import requests
 
+NODE_QUERY = '{"query":"query{allNodes{nodes{router{name}, name, role, assetId}}}"}'
+
 bp = Blueprint('conductor', __name__, url_prefix='/conductor')
 
 @bp.route('/')
@@ -84,7 +86,7 @@ def list_nodes(name=None):
     db = get_db()
     db_res = db.execute('SELECT url, auth_key FROM conductor WHERE name = ?', (name,)).fetchone()
     nodes = get_all_nodes(name, db_res['url'], db_res['auth_key'])
-    return render_template('conductor_list_nodes.html', nodes=nodes)
+    return render_template('conductor_list_nodes.html', nodes=nodes, conductor=name)
 
 def get_all_nodes(name, url, token):
     headers = {
@@ -92,32 +94,75 @@ def get_all_nodes(name, url, token):
         'Authorization': f"Bearer {token}"
     }
     try:
-        routers_resp = requests.get(f"{url}/api/v1/router", headers=headers, verify=False)
+        nodes_resp = requests.get(f"{url}/api/v1/graphql", data=NODE_QUERY, headers=headers, verify=False)
     except requests.exceptions.Timeout:
         flash(f"Timeout connecting to conductor {name}")
-        return None
+        return redirect(url_for('conductor.menu'))
 
-    if not routers_resp.ok:
-        flash(f"Conductor {name} returned error for /api/v1/router {routers_resp.status_code}: {routers_resp.json()}")
-        return None
+    if not nodes_resp.ok:
+        flash(f"Conductor {name} returned error for node query {nodes_resp.status_code}: {nodes_resp.json()}")
+        return redirect(url_for('conductor.menu'))
 
-    router_names = []
-    for router in routers_resp.json():
-        router_names.append(router.get('name'))
+    try:
+        nodes = nodes_resp.json()['data']['allNodes']['nodes']
+    except KeyError:
+        flash(f"There was an error attempting to parse the return data from conductor {name}")
+        return redirect(url_for('conductor.menu'))
+        
+    return nodes
 
-    router_nodes = []
-    for router in router_names:
-        try:
-            nodes_resp = requests.get(f"{url}/api/v1/router/{router}/node", headers=headers, verify=False)
-        except requests.exceptions.Timeout:
-            flash(f"Timeout connecting to conductor {name}")
-            return None
+@bp.route('/get_quickstart/<conductor>/<router>/<node>/<assetId>')
+def get_quickstart(conductor=None, router=None, node=None, assetId=None):
+    if conductor is None or router is None or node is None:
+        flash("A required parameter (conductor, router, or node) was not specified")
+        return redirect(url_for('conductor.menu'))
 
-        if not nodes_resp.ok:
-            flash(f"Conductor {name} returned error for /api/v1/node {nodes_resp.status_code}: {nodes_resp.json()}")
-            return None
+    db = get_db()
+    conductor_data = db.execute('SELECT url, auth_key FROM conductor WHERE name = ?', (conductor,)).fetchone()
 
-        for node in nodes_resp.json():
-            router_nodes.append((router, node.get('name')))
+    token = conductor_data['auth_key']
+    qs_url = conductor_data['url'] + '/api/v1/quickStart'
 
-    return router_nodes
+    headers = {
+        'Content-Type': 'application/json',
+        'Authorization': f"Bearer {token}"
+    }
+
+    node_data = {
+        'router': router,
+        'node': node,
+        'assetId': assetId,
+        'password': None
+    }
+
+    try:
+        qs_resp = requests.post(qs_url, headers=headers, data=json.dumps(node_data), verify=False)
+    except requests.exceptions.Timeout:
+        flash(f"Timeout connecting to conductor {name}")
+        return redirect(url_for('conductor.menu'))
+
+    if not qs_resp.ok:
+        flash(f"Conductor {name} returned error for quickstart query {qs_resp.status_code}: {qs_resp.json()}")
+        return redirect(url_for('conductor.menu'))
+
+    try:
+        qs_json = qs_resp.json()
+        qs_node = qs_json['n']
+        qs_asset = qs_json['a']
+        qs_config = qs_json['c']
+
+        db.execute('INSERT INTO quickstart (' \
+                       'conductor_name, ' \
+                       'router_name, ' \
+                       'node_name, ' \
+                       'asset_id, ' \
+                       'config, ' \
+                       'description) VALUES (?, ?, ?, ?, ?, ?)',
+           (conductor, router, qs_node, qs_asset, qs_config, 'Retrieved by blaster'))
+        db.commit()
+    except KeyError:
+        flash(f"Error parsing quickstart data returned from conductor {conductor} for router {router} node {node}")
+        return redirect(url_for('conductor.menu'))
+
+    flash(f"Added quickstart data returned from conductor {conductor} for router {router} node {node}")
+    return redirect(url_for('conductor.list'))
