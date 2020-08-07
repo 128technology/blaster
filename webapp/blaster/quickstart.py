@@ -4,6 +4,8 @@ from flask import (
     current_app, Blueprint, flash, Flask, g, redirect, render_template, request, session, url_for, jsonify
 )
 
+import json
+
 from blaster.db import get_db
 
 from . import constants
@@ -24,10 +26,11 @@ def instantiate(instance=None):
         return jsonify(error="Could not find a specific or default quickstart"), 404
 
     response = {}
-    response['quickstart'] = {
+    quickstart = {
         'a': qs_row['asset_id'],
         'n': qs_row['node_name'],
         'c': qs_row['config']
     }
+    response['quickstart'] = json.dumps(quickstart)
     response['password'] = None
     return jsonify(response)
