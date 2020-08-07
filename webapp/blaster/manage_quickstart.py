@@ -9,7 +9,6 @@ from blaster.db import get_db
 import json
 
 from blaster import constants
-from blaster import decoder
 
 bp = Blueprint('manage_quickstart', __name__, url_prefix='/manage_quickstart')
 
