@@ -23,12 +23,29 @@ def menu():
 
 @bp.route('/add/<id>', methods=['POST'])
 def add(id=None):
+    if id is None:
+        flash("No id specificed for node add action")
+        return redirect(url_for('node.menu'))
+
     db = get_db()
     active_name = get_active()
     active_row = db.execute('SELECT id FROM iso WHERE name = ?', (active_name,)).fetchone()
+    # Avoid duplicates.  Assume reblasted, clear out old entry and add a new one
+    db.execute('DELETE FROM node WHERE identifier = ?', (id,))
     db.execute('INSERT INTO node (identifier, iso_id)  VALUES (?, ?)', (id, active_row['id']))
     db.commit()
     return jsonify(added=id,blasted_with=active_name), 200
+
+@bp.route('/delete/<id>')
+def delete(id=None):
+    if id is None:
+        flash("No id specificed for node add action")
+        return redirect(url_for('node.menu'))
+
+    db = get_db()
+    db.execute('DELETE FROM node WHERE identifier = ?', (id,))
+    db.commit()
+    return redirect(url_for('node.list'))
 
 @bp.route('/list')
 def list():
