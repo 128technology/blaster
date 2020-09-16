@@ -9,6 +9,9 @@ from blaster import constants
 
 celery = Celery('tasks', broker='redis://localhost:6379/0')
 
+OTP_KICKSTART_FILE = 'ks.cfg'
+STANDARD_KICKSTART_FILE = '128T-ks.cfg'
+
 @celery.task(time_limit=1800)
 def setup_image(name):
     print(f"Adding ISO {name} to DB")
@@ -57,6 +60,17 @@ def setup_image(name):
         update_db_failed(name)
         return False
 
+    if (nfs_dir / OTP_KICKSTART_FILE).exists():
+        ks_file = OTP_KICKSTART_FILE
+        print(f"{name} is an OTP ISO based on the kickstart file found")
+    elif (nfs_dir / STANDARD_KICKSTART_FILE).exists():
+        ks_file = STANDARD_KICKSTART_FILE
+        print(f"{name} is a standard ISO based on the kickstart file found")
+    else:
+        print(f"Could not find either expected kickstart file in {name}, aborting")
+        update_db_failed(name)
+        return False
+
     uefi_image_dir = pathlib.Path(constants.UEFI_TFTPBOOT_DIR) / "images" / name
     uefi_image_dir.mkdir(parents=True, exist_ok=True)
 
@@ -89,7 +103,7 @@ def setup_image(name):
                       f"  kernel images/{name}/vmlinuz\n",
                       f"  append initrd=http://{constants.UEFI_IP}/images/{name}/initrd.img "
                       f"inst.stage2=nfs:{constants.NFS_IP}:{ pathlib.Path(constants.IMAGE_FOLDER) / name } "
-                      f"inst.ks=nfs:{constants.NFS_IP}:{ pathlib.Path(constants.IMAGE_FOLDER) / name }/ks.cfg "
+                      f"inst.ks=nfs:{constants.NFS_IP}:{ pathlib.Path(constants.IMAGE_FOLDER) / name }/{ ks_file } "
                        "console=ttyS0,115200n81\n",
                      ])
 
@@ -109,12 +123,12 @@ def setup_image(name):
                       f"  kernel images/{name}/vmlinuz\n",
                       f"  append initrd=images/{name}/initrd.img "
                       f"inst.stage2=nfs:{constants.NFS_IP}:{ pathlib.Path(constants.IMAGE_FOLDER) / name } "
-                      f"inst.ks=nfs:{constants.NFS_IP}:{ pathlib.Path(constants.IMAGE_FOLDER) / name }/ks.cfg "
+                      f"inst.ks=nfs:{constants.NFS_IP}:{ pathlib.Path(constants.IMAGE_FOLDER) / name }/{ ks_file } "
                        "console=ttyS0,115200n81\n",
                      ])
 
     print(f"Appending new post section to kickstart to post identifier after blast")
-    with open(nfs_dir / 'ks.cfg', 'a') as fh:
+    with open(nfs_dir / ks_file, 'a') as fh:
         fh.writelines(['%post\n',
                        'curl -XPOST http://192.168.128.128/node/add/`dmidecode --string system-serial-number`\n',
                        '%end\n'])
