@@ -11,6 +11,7 @@
       <th>Router Name</th>
       <th>Node Name</th>
       <th>Asset ID</th>
+      <th>Actions</th>
     </tr>
 {%- for node in nodes %}
     <tr>
@@ -20,6 +21,9 @@
       <td>{% if node['router_name'] %}{{ node['router_name'] }}{% endif %}</td>
       <td>{% if node['node_name'] %}{{ node['node_name'] }}{% endif %}</td>
       <td>{% if node['asset_id'] %}{{ node['asset_id'] }}{% endif %}</td>
+      <td>
+        <a href="{{ url_for('node.delete', id=node['identifier']) }}">Delete</a>
+      <td>
     </tr>
 {%- endfor %}
   </table>
