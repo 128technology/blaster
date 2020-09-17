@@ -52,8 +52,9 @@ def setup_image(name):
 
         # If it's already in here, don't re-add it
         if os.system(f"grep {name} /etc/exports") > 0:
+            fsid = len(open('/etc/exports').readlines())
             with open('/etc/exports', 'a') as fh:
-                fh.write(f"{nfs_dir} 192.168.128.0/24(fsid=0,no_root_squash)\n")
+                fh.write(f"{nfs_dir} 192.168.128.0/24(fsid={fsid},no_root_squash)\n")
         os.system('exportfs -ra')
     except OSError:
         print(f"There was an error when attempting to setup the NFS share for {name}")
