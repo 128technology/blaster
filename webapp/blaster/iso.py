@@ -86,13 +86,9 @@ def add(name=None):
 @bp.route('/list')
 def list():
     db = get_db()
-    statuses = db.execute('SELECT id, status FROM iso_status_enum').fetchall()
-    iso_status = {}
-    for status in statuses:
-        iso_status[status[0]] = status[1]
-    isos = db.execute('SELECT name, status_id FROM iso').fetchall()
+    isos = db.execute('SELECT name, status FROM iso').fetchall()
     active = get_active()
-    return render_template('iso_list.html', isos=isos, iso_status=iso_status, active=active)
+    return render_template('iso_list.html', isos=isos, active=active)
 
 @bp.route('/delete/<name>')
 def delete(name=None):
@@ -188,7 +184,7 @@ def upload():
             file.save(pathlib.Path(constants.IMAGE_FOLDER) / file.filename)
             name = os.path.splitext(file.filename)[0]
             db = get_db()
-            db.execute('INSERT INTO iso (name, status_id)  VALUES (?, ?)', (name, 1))
+            db.execute('INSERT INTO iso (name, status)  VALUES (?, ?)', (name, 'Processing'))
             db.commit()
             stage_image.delay(name)
             return redirect(url_for('menu.home'))
