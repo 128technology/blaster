@@ -11,16 +11,18 @@
       <th>Router Name</th>
       <th>Node Name</th>
       <th>Asset ID</th>
+      <th>Status</th>
       <th>Actions</th>
     </tr>
 {%- for node in nodes %}
     <tr>
       <td>{{ node['identifier'] }}</td>
-      <td>{% if node['name'] %}{{ node['name'] }}{% endif %}</td>
+      <td>{% if node['iso_id'] %}{{ node['iso_id'] }}{% endif %}</td>
       <td>{% if node['conductor_name'] %}{{ node['conductor_name'] }}{% endif %}</td>
       <td>{% if node['router_name'] %}{{ node['router_name'] }}{% endif %}</td>
       <td>{% if node['node_name'] %}{{ node['node_name'] }}{% endif %}</td>
       <td>{% if node['asset_id'] %}{{ node['asset_id'] }}{% endif %}</td>
+      <td>{% if node['status'] %}{{ node['status'] }}{% endif %}</td>
       <td>
         <a href="{{ url_for('node.delete', id=node['identifier']) }}">Delete</a>
       <td>
