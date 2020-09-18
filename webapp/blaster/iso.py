@@ -1,10 +1,24 @@
 import functools
 
 from flask import (
-    current_app, Blueprint, flash, Flask, g, redirect, render_template, request, session, url_for
+    current_app,
+    Blueprint,
+    flash,
+    Flask,
+    g,
+    redirect,
+    render_template,
+    request,
+    session,
+    url_for
 )
 
-from blaster.tasks import setup_image, remove_image
+from blaster.tasks import (
+    download_image,
+    stage_image,
+    remove_image
+)
+
 from blaster.db import get_db
 
 import os
@@ -65,7 +79,7 @@ def add(name=None):
         return redirect(url_for('iso.menu'))
 
     print(f"setting up {name}")
-    setup_image.delay(name)
+    download_image.delay(name)
     flash(f"Beginning download of {name}, please check back later for status")
     return redirect(url_for('iso.menu'))
 
@@ -151,3 +165,32 @@ def update_active(name=None):
     except Error:
         flash("There was an unspecified error updating the active ISO")
         return redirect(url_for('iso.menu'))
+
+@bp.route('/upload', methods=('GET', 'POST'))
+def upload():
+    if request.method == 'POST':
+        if 'file' not in request.files:
+            flash('No file part')
+            return redirect(request.url)
+
+        file = request.files['file']
+
+        if file.filename == '':
+            flash('No file selected')
+            return redirect(request.url)
+
+        if file:
+            try:
+                os.mkdir(constants.IMAGE_FOLDER)
+            except OSError:
+                pass
+
+            file.save(pathlib.Path(constants.IMAGE_FOLDER) / file.filename)
+            name = os.path.splitext(file.filename)[0]
+            db = get_db()
+            db.execute('INSERT INTO iso (name, status_id)  VALUES (?, ?)', (name, 1))
+            db.commit()
+            stage_image.delay(name)
+            return redirect(url_for('menu.home'))
+
+    return render_template('iso_upload.html')
