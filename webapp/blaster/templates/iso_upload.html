@@ -1,0 +1,13 @@
+{% extends "layout.html" %}
+{% block body %}
+<nav>
+<h1>ISOs</h1>
+<h2>Upload ISO</h2>
+<form method="post" enctype=multipart/form-data>
+  <label for="cert">ISO</label>
+  <input type="file" name="file">
+  <br>
+  <input type="submit" value="upload">
+</form>
+</nav>
+{% endblock %}
