@@ -4,7 +4,6 @@ from flask import (
     current_app, Blueprint, flash, Flask, g, redirect, render_template, request, session, url_for
 )
 
-from blaster.tasks import setup_image, remove_image
 from blaster.db import get_db
 
 import json
