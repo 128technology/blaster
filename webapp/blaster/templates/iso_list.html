@@ -13,12 +13,12 @@
 {%- for iso in isos %}
     <tr>
       <td>{{ iso['name'] }}</td>
-      <td>{{ iso_status[iso['status_id']] }}</td>
+      <td>{{ iso['status'] }}</td>
       <td>{% if active == iso['name'] %}X{% endif %}</td>
       <td>
           <a href="{{ url_for('iso.delete', name=iso['name']) }}">Delete</a>
               {% if active != iso['name'] %}
-          {% if iso['status_id'] == 2 %}
+          {% if iso['status'] == 'Ready' %}
           &nbsp<a href="{{ url_for('iso.update_active', name=iso['name']) }}">Set as Active</a>
               {% endif %}
           {% endif %}
