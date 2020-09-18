@@ -28,10 +28,9 @@ def add(id=None):
 
     db = get_db()
     active_name = get_active()
-    active_row = db.execute('SELECT id FROM iso WHERE name = ?', (active_name,)).fetchone()
     # Avoid duplicates.  Assume reblasted, clear out old entry and add a new one
     db.execute('DELETE FROM node WHERE identifier = ?', (id,))
-    db.execute('INSERT INTO node (identifier, iso_id)  VALUES (?, ?)', (id, active_row['id']))
+    db.execute('INSERT INTO node (identifier, iso_id, status)  VALUES (?, ?, ?)', (id, active_name, 'Blasted'))
     db.commit()
     return jsonify(added=id,blasted_with=active_name), 200
 
@@ -49,7 +48,7 @@ def delete(id=None):
 @bp.route('/list')
 def list():
     db = get_db()
-    nodes = db.execute('select n.id, n.identifier, i.name, q.conductor_name, q.router_name, q.node_name, q.asset_id FROM node n LEFT JOIN quickstart q ON n.quickstart_id = q.id LEFT JOIN iso i ON n.iso_id = i.id').fetchall()
+    nodes = db.execute('select n.id, n.identifier, n.status, n.iso_id, q.conductor_name, q.router_name, q.node_name, q.asset_id FROM node n LEFT JOIN quickstart q ON n.quickstart_id = q.id').fetchall()
     print(nodes)
     return render_template('node_list.html', nodes=nodes)
 
