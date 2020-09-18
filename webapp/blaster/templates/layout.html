@@ -1,6 +1,7 @@
 <!doctype html>
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 <title>128T Blaster</title>
+<a href="{{ url_for('menu.home') }}">Main Menu</a>
 {% with messages = get_flashed_messages() %}
   {% if messages %}
     <u1 class=flashes>
