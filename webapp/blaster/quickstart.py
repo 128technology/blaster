@@ -33,4 +33,6 @@ def instantiate(instance=None):
     }
     response['quickstart'] = json.dumps(quickstart)
     response['password'] = None
+    db.execute('UPDATE node SET status = ? WHERE identifier = ?', ('Bootstrapped', instance))
+    db.commit()
     return jsonify(response)
