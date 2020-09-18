@@ -12,8 +12,11 @@ celery = Celery('tasks', broker='redis://localhost:6379/0')
 OTP_KICKSTART_FILE = 'ks.cfg'
 STANDARD_KICKSTART_FILE = '128T-ks.cfg'
 
+def iso_file(name):
+    return pathlib.Path(constants.IMAGE_FOLDER) / (name + '.iso')
+
 @celery.task(time_limit=1800)
-def setup_image(name):
+def download_image(name):
     print(f"Adding ISO {name} to DB")
     db = get_db()
     db.execute('INSERT INTO iso (name, status_id)  VALUES (?, ?)', (name, 1))
@@ -36,11 +39,13 @@ def setup_image(name):
     except OSError:
         pass
 
-    iso_file = pathlib.Path(constants.IMAGE_FOLDER) / (name + '.iso')
-    nfs_dir = pathlib.Path(constants.IMAGE_FOLDER) / name
-    with open(iso_file, 'wb+') as iso:
+    with open(iso_file(name), 'wb+') as iso:
         iso.write(resp.content)
+    return stage_image(name)
 
+@celery.task()
+def stage_image(name):
+    nfs_dir = pathlib.Path(constants.IMAGE_FOLDER) / name
     # Make sure destination doesn't exist
     try:
         os.rmdir(nfs_dir)
@@ -48,7 +53,7 @@ def setup_image(name):
         pass
 
     try:
-        os.system(f"osirrox -indev {iso_file} -extract / {nfs_dir}")
+        os.system(f"osirrox -indev {iso_file(name)} -extract / {nfs_dir}")
 
         # If it's already in here, don't re-add it
         if os.system(f"grep {name} /etc/exports") > 0:
@@ -135,6 +140,7 @@ def setup_image(name):
                        '%end\n'])
 
     print(f"Image {name} appears to have been setup correctly, updating DB")
+    db = get_db()
     db.execute('UPDATE iso SET status_id = ? WHERE name = ?', (2, name))
     db.commit()
 
