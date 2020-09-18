@@ -19,7 +19,7 @@ def iso_file(name):
 def download_image(name):
     print(f"Adding ISO {name} to DB")
     db = get_db()
-    db.execute('INSERT INTO iso (name, status_id)  VALUES (?, ?)', (name, 1))
+    db.execute('INSERT INTO iso (name, status)  VALUES (?, ?)', (name, 'Processing'))
     db.commit()
     print(f"Attempting to download ISO {name}")
     resp = requests.get(
@@ -141,14 +141,14 @@ def stage_image(name):
 
     print(f"Image {name} appears to have been setup correctly, updating DB")
     db = get_db()
-    db.execute('UPDATE iso SET status_id = ? WHERE name = ?', (2, name))
+    db.execute('UPDATE iso SET status = ? WHERE name = ?', ('Ready', name))
     db.commit()
 
     return True
 
 def update_db_failed(name):
     db = get_db()
-    db.execute('UPDATE iso SET status_id = ? WHERE name = ?', (3, name))
+    db.execute('UPDATE iso SET status = ? WHERE name = ?', ('Failed', name))
     db.commit()
 
 @celery.task()
