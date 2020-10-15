@@ -35,6 +35,7 @@ def download_image(name):
                 cert=os.path.join(constants.CERTIFICATE_FOLDER, constants.CERT_FILE),
                 allow_redirects=True,
                 stream=True) as dl:
+            dl.raise_for_status()
             with open(iso_file(name), 'wb+') as iso:
                 for chunk in dl.iter_content(chunk_size=1024000): # 1M chunks
                     iso.write(chunk)
