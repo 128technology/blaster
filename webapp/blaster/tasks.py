@@ -21,26 +21,29 @@ def download_image(name):
     db = get_db()
     db.execute('INSERT INTO iso (name, status)  VALUES (?, ?)', (name, 'Processing'))
     db.commit()
-    print(f"Attempting to download ISO {name}")
-    resp = requests.get(
-        f"{constants.ISO_REPO_URL}{name}.iso",
-        cert=os.path.join(constants.CERTIFICATE_FOLDER, constants.CERT_FILE),
-        allow_redirects=True
-    )
-    if not resp.ok:
-        print(f"Issue downloading ISO {name}")
-        update_db_failed(name)
-        return False
 
-    print(f"ISO {name} downloaded successfully")
     # ensure iso folder exists
     try:
         os.makedirs(constants.IMAGE_FOLDER)
     except OSError:
         pass
 
-    with open(iso_file(name), 'wb+') as iso:
-        iso.write(resp.content)
+    print(f"Attempting to download ISO {name}")
+    try:
+        with requests.get(
+                f"{constants.ISO_REPO_URL}{name}.iso",
+                cert=os.path.join(constants.CERTIFICATE_FOLDER, constants.CERT_FILE),
+                allow_redirects=True,
+                stream=True) as dl:
+            with open(iso_file(name), 'wb+') as iso:
+                for chunk in dl.iter_content(chunk_size=1024000): # 1M chunks
+                    iso.write(chunk)
+    except Exception as e:
+        print(f"Exception downloading ISO {name}: {e}")
+        update_db_failed(name)
+        return False
+
+    print(f"ISO {name} downloaded successfully")
     return stage_image(name)
 
 @celery.task()
