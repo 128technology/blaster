@@ -84,8 +84,12 @@ def list_nodes(name=None):
 
     db = get_db()
     db_res = db.execute('SELECT url, auth_key FROM conductor WHERE name = ?', (name,)).fetchone()
-    nodes = get_all_nodes(name, db_res['url'], db_res['auth_key'])
-    return render_template('conductor_list_nodes.html', nodes=nodes, conductor=name)
+    nodes, error = get_all_nodes(name, db_res['url'], db_res['auth_key'])
+    if nodes:
+        return render_template('conductor_list_nodes.html', nodes=nodes, conductor=name)
+
+    flash(error)
+    return redirect(url_for('conductor.menu'))
 
 def get_all_nodes(name, url, token):
     headers = {
@@ -95,20 +99,21 @@ def get_all_nodes(name, url, token):
     try:
         nodes_resp = requests.get(f"{url}/api/v1/graphql", data=NODE_QUERY, headers=headers, verify=False)
     except requests.exceptions.Timeout:
-        flash(f"Timeout connecting to conductor {name}")
-        return redirect(url_for('conductor.menu'))
+        return False, f"Timeout connecting to conductor {name}"
+    except OSError as e:
+        return False, f"OSException connecting to conductor {name}: {e}"
+    except Exception as e:
+        return False, f"There was an unspecified Exception connecing to conductor {name}: {e}"
 
     if not nodes_resp.ok:
-        flash(f"Conductor {name} returned error for node query {nodes_resp.status_code}: {nodes_resp.json()}")
-        return redirect(url_for('conductor.menu'))
+        return False, f"Conductor {name} returned error for node query {nodes_resp.status_code}: {nodes_resp.json()}"
 
     try:
         nodes = nodes_resp.json()['data']['allNodes']['nodes']
     except KeyError:
-        flash(f"There was an error attempting to parse the return data from conductor {name}")
-        return redirect(url_for('conductor.menu'))
+        return False, f"There was an error attempting to parse the return data from conductor {name}"
         
-    return nodes
+    return nodes, None
 
 @bp.route('/get_quickstart/<conductor>/<router>/<node>/<assetId>')
 def get_quickstart(conductor=None, router=None, node=None, assetId=None):
