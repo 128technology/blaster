@@ -4,6 +4,7 @@ from flask import (
     current_app, Blueprint, flash, Flask, g, redirect, render_template, request, session, url_for, jsonify
 )
 
+from blaster.conductor import get_all_nodes, get_quickstart_work
 from blaster.db import get_db
 from blaster.iso import get_active
 
@@ -62,11 +63,46 @@ def associate():
             flash("Both a quickstart and node identifier must be selected")
             return redirect(request.url)
 
-        db.execute('UPDATE node SET quickstart_id = ? WHERE identifier = ?', (qs_id, identifier))
-        db.commit()
+        associate_quickstart_to_node(qs_id, identifier)
         flash(f"made quickstart association for node with identifier of {identifier}")
         return redirect(request.url)
 
     quickstarts = db.execute('SELECT id, conductor_name, node_name, router_name FROM quickstart').fetchall()
     nodes = db.execute('SELECT identifier, quickstart_id from node').fetchall()
     return render_template('node_quickstart_associate.html', quickstarts=quickstarts, nodes=nodes)
+
+def associate_quickstart_to_node(qs_id, identifier):
+    db = get_db()
+    db.execute('UPDATE node SET quickstart_id = ? WHERE identifier = ?', (qs_id, identifier))
+    db.commit()
+
+@bp.route('/fetch', methods=('POST',))
+def fetch():
+    db = get_db()
+    blasted_nodes = db.execute('SELECT id, identifier FROM node WHERE status = "Blasted" and quickstart_id is null').fetchall()
+    blasted_list = []
+    for node in blasted_nodes:
+        blasted_list.append(node[1])
+
+    conductors = db.execute('SELECT name, url, auth_key FROM conductor').fetchall()
+    errors = []
+    for conductor in conductors:
+        nodes, error = get_all_nodes(conductor[0], conductor[1], conductor[2])
+        if error:
+            errors.append(error)
+            continue
+
+        for node in nodes:
+            if node['assetId'] in blasted_list:
+                router_name = node['router']['name']
+                node_name = node['name']
+                assetId = node['assetId']
+                success, qs_id_or_error = get_quickstart_work(conductor[0], router_name, node_name, assetId)
+                if success:
+                    associate_quickstart_to_node(qs_id_or_error, assetId)
+
+                else:
+                    errors.append(qs_id_or_error)
+
+    flash('\n'.join(errors))
+    return redirect(url_for('node.list'))
