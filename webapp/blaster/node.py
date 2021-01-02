@@ -11,7 +11,6 @@ from blaster.iso import get_active
 import os
 import pathlib
 import re
-import requests
 from lxml import html
 from . import constants
 
