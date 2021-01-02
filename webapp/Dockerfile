@@ -20,6 +20,7 @@ COPY celery_worker.py /opt/
 COPY celery.service /etc/systemd/system/
 RUN mkdir /etc/conf.d
 COPY conf.d-celery /etc/conf.d/celery
+COPY proxy.conf /etc/conf.d/proxy.conf
 COPY webapp.service /etc/systemd/system
 
 RUN systemctl enable celery
