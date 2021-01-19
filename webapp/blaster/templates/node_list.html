@@ -25,6 +25,9 @@
       <td>{% if node['status'] %}{{ node['status'] }}{% endif %}</td>
       <td>
         <a href="{{ url_for('node.delete', id=node['identifier']) }}">Delete</a>
+{%- if node['router_name'] %}
+        <a href="{{ url_for('node.disassociate', identifier=node['identifier']) }}">Clear Quickstart</a>
+{%- endif %}
       <td>
     </tr>
 {%- endfor %}
