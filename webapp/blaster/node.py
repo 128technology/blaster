@@ -75,6 +75,18 @@ def associate_quickstart_to_node(qs_id, identifier):
     db.execute('UPDATE node SET quickstart_id = ? WHERE identifier = ?', (qs_id, identifier))
     db.commit()
 
+@bp.route('/disassociate')
+def disassociate():
+    identifier = request.args.get('identifier')
+    disassociate_quickstart_from_node(identifier)
+    flash(f"Cleared quickstart association for node {identifier}")
+    return redirect(url_for('node.list'))
+
+def disassociate_quickstart_from_node(identifier):
+    db = get_db()
+    db.execute('UPDATE node SET quickstart_id = null WHERE identifier = ?', (identifier,))
+    db.commit()
+
 @bp.route('/fetch', methods=('POST',))
 def fetch():
     db = get_db()
