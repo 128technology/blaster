@@ -5,6 +5,7 @@ import shutil
 from celery import Celery
 import requests
 from blaster.db import get_db
+from blaster.password import update_password
 from blaster import constants
 
 celery = Celery('tasks', broker='redis://localhost:6379/0')
@@ -143,6 +144,8 @@ def stage_image(name):
                        'curl -XPOST http://192.168.128.128/node/add/`dmidecode --string system-serial-number`\n',
                        '%end\n'])
 
+    print(f"Updating password hashes for image {name}")
+    update_password(name)
     print(f"Image {name} appears to have been setup correctly, updating DB")
     db = get_db()
     db.execute('UPDATE iso SET status = ? WHERE name = ?', ('Ready', name))
