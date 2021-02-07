@@ -34,7 +34,7 @@ def modify():
     entry = db.execute('SELECT * FROM passwords WHERE username = ?', (username,)).fetchone()
     if entry:
         db.execute('UPDATE passwords SET password_hash = ? WHERE username = ?', 
-            (username, hashed_password))
+            (hashed_password, username))
         db.commit()
         flash(f"Password for {username} updated")
         return redirect(url_for('password.menu'))
