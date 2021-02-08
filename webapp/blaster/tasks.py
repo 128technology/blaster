@@ -10,8 +10,12 @@ from blaster import constants
 
 celery = Celery('tasks', broker='redis://localhost:6379/0')
 
-OTP_KICKSTART_FILE = 'ks.cfg'
-STANDARD_KICKSTART_FILE = '128T-ks.cfg'
+LEGACY_OTP_KICKSTART_FILE = 'ks.cfg'
+LEGACY_STANDARD_KICKSTART_FILE = '128T-ks.cfg'
+COMBINED_ISO_OTP_KS_FILE = 'ks-otp.cfg'
+COMBINED_ISO_OTP_UEFI_KS_FILE = 'ks-otp-uefi.cfg'
+COMBINED_ISO_INTERACTIVE_KS_FILE = 'ks-interactive.cfg'
+COMBINED_ISO_INTERACTIVE_UEFI_KS_FILE = 'ks-interactive-uefi.cfg'
 
 def iso_file(name):
     return pathlib.Path(constants.IMAGE_FOLDER) / (name + '.iso')
@@ -71,12 +75,19 @@ def stage_image(name):
         update_db_failed(name)
         return False
 
-    if (nfs_dir / OTP_KICKSTART_FILE).exists():
-        ks_file = OTP_KICKSTART_FILE
-        print(f"{name} is an OTP ISO based on the kickstart file found")
-    elif (nfs_dir / STANDARD_KICKSTART_FILE).exists():
-        ks_file = STANDARD_KICKSTART_FILE
-        print(f"{name} is a standard ISO based on the kickstart file found")
+    combined_iso = False
+    if (nfs_dir / LEGACY_OTP_KICKSTART_FILE).exists():
+        ks_file = LEGACY_OTP_KICKSTART_FILE
+        print(f"{name} is a legacy format OTP ISO based on the kickstart file found")
+    elif (nfs_dir / LEGACY_STANDARD_KICKSTART_FILE).exists():
+        ks_file = LEGACY_STANDARD_KICKSTART_FILE
+        print(f"{name} is a legacy format standard ISO based on the kickstart file found")
+    elif (nfs_dir / COMBINED_ISO_OTP_KS_FILE).exists() and \
+         (nfs_dir / COMBINED_ISO_OTP_UEFI_KS_FILE).exists() and \
+         (nfs_dir / COMBINED_ISO_INTERACTIVE_KS_FILE).exists() and \
+         (nfs_dir / COMBINED_ISO_INTERACTIVE_UEFI_KS_FILE).exists():
+        print(f"{name} is a combined ISO based on the kickstart files found")
+        combined_iso = True
     else:
         print(f"Could not find either expected kickstart file in {name}, aborting")
         update_db_failed(name)
@@ -102,8 +113,25 @@ def stage_image(name):
     uefi_pxelinux_dir.mkdir(parents=True, exist_ok=True)
 
     print(f"Writing UEFI pxelinux config for {name}")
-    with open(uefi_pxelinux_dir / name, "w+") as fh:
-        fh.writelines(["UI menu.c32\n",
+    if combined_iso:
+        with open(uefi_pxelinux_dir / name, "w+") as fh:
+            fh.writelines(["UI menu.c32\n",
+                       "timeout 30\n",
+                       "\n",
+                       "display boot.msg\n",
+                       "\n",
+                       "MENU TITLE PXE Boot MENU\n",
+                       "\n",
+                      f"label {name}\n",
+                      f"  kernel images/{name}/vmlinuz\n",
+                      f"  append initrd=http://{constants.UEFI_IP}/images/{name}/initrd.img "
+                      f"inst.stage2=nfs:{constants.NFS_IP}:{ pathlib.Path(constants.IMAGE_FOLDER) / name } "
+                      f"inst.ks=nfs:{constants.NFS_IP}:{ pathlib.Path(constants.IMAGE_FOLDER) / name }/{ COMBINED_ISO_OTP_UEFI_KS_FILE } "
+                       "console=ttyS0,115200n81\n",
+                     ])
+    else:
+        with open(uefi_pxelinux_dir / name, "w+") as fh:
+            fh.writelines(["UI menu.c32\n",
                        "timeout 30\n",
                        "\n",
                        "display boot.msg\n",
@@ -122,8 +150,25 @@ def stage_image(name):
     bios_pxelinux_dir.mkdir(parents=True, exist_ok=True)
 
     print(f"Writing BIOS pxelinux config for {name}")
-    with open(bios_pxelinux_dir / name, "w+") as fh:
-        fh.writelines([f"default {name}\n",
+    if combined_iso:
+        with open(bios_pxelinux_dir / name, "w+") as fh:
+            fh.writelines([f"default {name}\n",
+                       "timeout 30\n",
+                       "\n",
+                       "display boot.msg\n",
+                       "\n",
+                       "MENU TITLE PXE Boot MENU\n",
+                       "\n",
+                      f"label {name}\n",
+                      f"  kernel images/{name}/vmlinuz\n",
+                      f"  append initrd=images/{name}/initrd.img "
+                      f"inst.stage2=nfs:{constants.NFS_IP}:{ pathlib.Path(constants.IMAGE_FOLDER) / name } "
+                      f"inst.ks=nfs:{constants.NFS_IP}:{ pathlib.Path(constants.IMAGE_FOLDER) / name }/{ COMBINED_ISO_OTP_KS_FILE } "
+                       "console=ttyS0,115200n81\n",
+                     ])
+    else:
+        with open(bios_pxelinux_dir / name, "w+") as fh:
+            fh.writelines([f"default {name}\n",
                        "timeout 30\n",
                        "\n",
                        "display boot.msg\n",
@@ -139,8 +184,18 @@ def stage_image(name):
                      ])
 
     print(f"Appending new post section to kickstart to post identifier after blast")
-    with open(nfs_dir / ks_file, 'a') as fh:
-        fh.writelines(['%post\n',
+    if combined_iso:
+        with open(nfs_dir / COMBINED_ISO_OTP_UEFI_KS_FILE, 'a') as fh:
+            fh.writelines(['%post\n',
+                       'curl -XPOST http://192.168.128.128/node/add/`dmidecode --string system-serial-number`\n',
+                       '%end\n'])
+        with open(nfs_dir / COMBINED_ISO_OTP_KS_FILE, 'a') as fh:
+            fh.writelines(['%post\n',
+                       'curl -XPOST http://192.168.128.128/node/add/`dmidecode --string system-serial-number`\n',
+                       '%end\n'])
+    else:
+        with open(nfs_dir / ks_file, 'a') as fh:
+            fh.writelines(['%post\n',
                        'curl -XPOST http://192.168.128.128/node/add/`dmidecode --string system-serial-number`\n',
                        '%end\n'])
 
