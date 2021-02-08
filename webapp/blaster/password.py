@@ -89,7 +89,7 @@ def update_password(iso_name):
             username = re.match('^user.* --name=([a-z0-9_-]+) .*$', line).group(1)
             try:
                 phash = pass_dict[username]
-                line = re.sub(r'--password=.[aA-zZ0-9$+/]+ ', f'--password={phash} ', line)
+                line = re.sub(r'--password=[aA-zZ0-9$+/.]+ ', f'--password={phash} ', line)
             except KeyError:
                 pass
         new_user_lines.append(line)
