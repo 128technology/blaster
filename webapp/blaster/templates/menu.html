@@ -1,14 +1,26 @@
 {% extends "layout.html" %}
 {% block body %}
-<nav>
-  <h1>Blaster</h1>
+<div class="menu">
+  <h1>Main Menu</h1>
   <ul>
-      <li><a href="{{ url_for('certificate.menu') }}">Manage Certificate</a>
-      <li><a href="{{ url_for('iso.menu') }}">Manage ISOs</a>
-      <li><a href="{{ url_for('conductor.menu') }}">Manage Conductors</a>
-      <li><a href="{{ url_for('manage_quickstart.menu') }}">Manage Quickstarts</a>
-      <li><a href="{{ url_for('node.menu') }}">Manage Nodes</a>
-      <li><a href="{{ url_for('password.menu') }}">Manage Passwords</a>
+    <li><a href="{{ url_for('certificate.menu') }}">Manage Certificate</a>
+    <li><a href="{{ url_for('iso.menu') }}">Manage ISOs</a>
+    <li><a href="{{ url_for('conductor.menu') }}">Manage Conductors</a>
+    <li><a href="{{ url_for('manage_quickstart.menu') }}">Manage Quickstarts</a>
+    <li><a href="{{ url_for('node.menu') }}">Manage Nodes</a>
+    <li><a href="{{ url_for('password.menu') }}">Manage Passwords</a>
   </ul>
-</nav>
+</div>
+<div class="help_text">
+  <H2>About the Blaster</H2>
+  <P>The blaster is designed to function as a PXE boot server to use for installing official 128T OTP ISOs on whitebox hardware. In addition, the blaster can function as a bootstrap server offering 128T quickstart files via REST per <a href="https://docs.128technology.com/docs/intro_otp_iso_install/">the official 128T bootstrapping process</a>. The official <a href="https://github.com/128technology/blaster">home of the blaster</a> is on the 128T GitHub site. Below you will find details about the menu options found above.</P>
+  <ul>
+    <li><strong>Manage Certificates</strong> - Manage your 128T Yum certificate needed to access published ISOs
+    <li><strong>Manage ISOs</strong> - Download ISOs from the 128T yum server, view ISOs already downloaded, and change the active ISO currently used for blasting systems
+    <li><strong>Manage Conductors</strong> - Setup Access to Conductors in order to download quickstarts via API
+    <li><strong>Manage Quickstarts</strong> - View quickstarts currently ready for use with the blaster and upload new quickstarts manually
+    <li><strong>Manage Nodes</strong> - View systems that have been blasted, make associations between a specific device and a quickstart file following the OTP process
+    <li><strong>Manage Passwords</strong> - Setup passwords to override ISO system default passwords
+  </ul>
+</div>
 {% endblock %}

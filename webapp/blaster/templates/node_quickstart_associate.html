@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 {% block body %}
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-<nav>
+<div class="menu">
   <h1>Nodes</h1>
   <form method="post" enctype=multipart/form-data>
 {%- for quickstart in quickstarts %}
@@ -20,5 +20,9 @@
     <br>
     <input type="submit" value="Submit">
   </form>
-</nav>
+</div>
+<div class="help_text">
+  <H2>Managing Nodes</H2>
+  <P>To associate a quickstart with a node, first select the appropriate quickstart's radio button then select the node's hardware identifier from the drop down list</P>
+</div>
 {% endblock %}
