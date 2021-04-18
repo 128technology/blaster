@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 {% block body %}
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-<nav>
+<div class=menu>
   <h1>Nodes</h1>
   <table>
     <tr>
@@ -35,5 +35,10 @@
   <form action="/node/fetch" method="post">
     <input type="Submit" value="Fetch Quickstarts">
   </form>
-</nav>
+</div>
+<div class="help_text">
+  <H2>Managing Nodes</H2>
+    <li><strong>Fetch Quickstarts</strong> - If your process is to provision systems in your conductor(s) using the system identifier, this button can be used to query all the conductors configured through the <strong>Manage Conductors</strong> menu to check for nodes whose asset id match any "Blasted" but not "Bootstrapped" nodes. If a match is found, the quickstart will be downloaded from the conductor and the quickstart association will automatically be made.
+  </ul>
+</div>
 {% endblock %}
