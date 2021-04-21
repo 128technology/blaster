@@ -1,6 +1,91 @@
 {% extends "layout.html" %}
 {% block body %}
+{% set cond_dict = {} %}
+{% for qs in quickstarts %}
+  {% set router_dict = cond_dict.get(qs['conductor_name']) %}
+  {% if router_dict %}
+    {% set node_list = router_dict.get(qs['router_name']) %}
+    {% if node_list %}
+      {% do node_list.append((qs['node_name'], qs['id'])) %}
+    {% else %}
+      {% set node_list = [(qs['node_name'], qs['id'])] %}
+    {% endif %}
+    {% do router_dict.update({qs['router_name']: node_list}) %}
+  {% else %}
+    {% set router_dict = ({qs['router_name']:[(qs['node_name'], qs['id'])]}) %}
+  {% endif %}
+  {% do cond_dict.update({qs['conductor_name']:router_dict}) %}
+{% endfor %}
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<script language="javascript" type="text/javascript">
+function getObjProps(obj) {
+  var props = [];
+  for (var i in obj) {
+    if (obj.hasOwnProperty(i)) {
+      props.push(i);
+    }
+  }
+  return props.sort();
+}
+function dynamicdropdown(elem)
+{
+  var cond_dict_json = {{ cond_dict | tojson }};
+  var elem_split = elem.id.split('_');
+  switch(elem_split[1])
+  {
+    case "conductor" :
+      cond_name = elem.options[elem.selectedIndex].value;
+      // Empty Router and Node list and set initial option
+      var router_elem = document.getElementById(elem_split[0] + "_router")
+      while (router_elem.options.length > 1) {
+        router_elem.remove(router_elem.options.length - 1);
+      }
+      var node_elem = document.getElementById(elem_split[0] + "_node")
+      while (node_elem.options.length > 1) {
+        node_elem.remove(node_elem.options.length - 1);
+      }
+      var router_dict_json = cond_dict_json[cond_name];
+      var router_list = getObjProps(router_dict_json);
+      for (i = 0; i < router_list.length; i++) {
+        document.getElementById(elem_split[0] + "_router").options[i + 1]=new Option(router_list[i], router_list[i]);
+      }
+      break;
+    case "router" :
+      router_name = elem.options[elem.selectedIndex].value;
+      // Empty Node list and set initial option
+      var node_elem = document.getElementById(elem_split[0] + "_node")
+      while (node_elem.options.length > 1) {
+        node_elem.remove(node_elem.options.length - 1);
+      }
+      cond_elem = document.getElementById(elem_split[0] + "_conductor");
+      cond_name = cond_elem.options[cond_elem.selectedIndex].value;
+      node_list = cond_dict_json[cond_name][router_name];
+      for (i = 0; i < node_list.length; i++) {
+        document.getElementById(elem_split[0] + "_node").options[i + 1]=new Option(node_list[i][0], node_list[i][1]);
+      }
+      break;
+    case "node" :
+      var associate_form = document.getElementById("quickstart_association");
+      // Delete any children whose name matches this identifier
+      var node_list = associate_form.getElementsByClassName("node_identifier");
+      for (i = 0; i < node_list.length; i++) {
+        if (node_list[i].name === elem_split[0]) {
+          associate_form.removeChild(node_list[i]);
+        }
+      }
+
+      if (elem.value !== "") {
+        var input = document.createElement("input");
+        input.type = "hidden";
+        input.className = "node_identifier";
+        input.name = elem_split[0];
+        input.id = elem_split[0];
+        input.value = elem.value;
+        associate_form.appendChild(input);
+      }
+  }
+}
+</script>
 <div class=menu>
   <h1>Nodes</h1>
   <table>
@@ -18,9 +103,36 @@
     <tr>
       <td>{{ node['identifier'] }}</td>
       <td>{% if node['iso_id'] %}{{ node['iso_id'] }}{% endif %}</td>
-      <td>{% if node['conductor_name'] %}{{ node['conductor_name'] }}{% endif %}</td>
-      <td>{% if node['router_name'] %}{{ node['router_name'] }}{% endif %}</td>
-      <td>{% if node['node_name'] %}{{ node['node_name'] }}{% endif %}</td>
+      <td>
+{% if node['conductor_name'] %}
+        {{ node['conductor_name'] }}
+{% else %}
+        <select id="{{ node['identifier'] }}_conductor" name="{{ node['identifier'] }}_conductor" onchange="javascript: dynamicdropdown(this);">
+          <option value="">Select conductor</option>
+  {% for conductor in cond_dict.keys() %}
+          <option value="{{ conductor }}">{{ conductor }}</option>
+  {% endfor %}
+        </select>
+{% endif %}
+      </td>
+      <td>
+{% if node['router_name'] %}
+        {{ node['router_name'] }}
+{% else %}
+        <select id="{{ node['identifier'] }}_router" name="{{ node['identifier'] }}_router" onchange="javascript: dynamicdropdown(this);">
+          <option value="">Select router</option>
+        </select>
+{% endif %}
+      </td>
+      <td>
+{% if node['node_name'] %}
+        {{ node['node_name'] }}
+{% else %}
+        <select id="{{ node['identifier'] }}_node" name="{{ node['identifier'] }}_node" onchange="javascript: dynamicdropdown(this);">
+          <option value="">Select node</option>
+        </select>
+{% endif %}
+      </td>
       <td>{% if node['asset_id'] %}{{ node['asset_id'] }}{% endif %}</td>
       <td>{% if node['status'] %}{{ node['status'] }}{% endif %}</td>
       <td>
@@ -32,13 +144,21 @@
     </tr>
 {%- endfor %}
   </table>
+  <br>
+  <form id="quickstart_association" action="/node/associate" method="post">
+    <input type="Submit" value="Associate Quickstarts">
+  </form>
+  <br>
   <form action="/node/fetch" method="post">
     <input type="Submit" value="Fetch Quickstarts">
   </form>
 </div>
 <div class="help_text">
   <H2>Managing Nodes</H2>
-    <li><strong>Fetch Quickstarts</strong> - If your process is to provision systems in your conductor(s) using the system identifier, this button can be used to query all the conductors configured through the <strong>Manage Conductors</strong> menu to check for nodes whose asset id match any "Blasted" but not "Bootstrapped" nodes. If a match is found, the quickstart will be downloaded from the conductor and the quickstart association will automatically be made.
-  </ul>
+    <P>After a system has been installed via PXE boot from the blaster, it will power itself off. At that point, you should see the node appear in this table. Each row shows a node's hardware identifier (typically the serial number if the vendor has burned this into DMI memory) and the ISO that the system was blasted with. When a quickstart is associated with a node, you will see the conductor name, router name, and node name based on the quickstart definition from the <strong>Manage Quickstarts</strong> menu. The status will show "Blasted" after a system has had the ISO installed via PXE boot. It will show "Bootstrapped" after the system successfully retrieves a quickstart from the blaster.</P>
+    <P>After the ISO is installed (Blasted status), the first time the hardware is installed it will attempt to retrieve a quickstart from the blaster. If a specific quickstart is associated with the node as shown here, that quickstart will be returned. If no specific quickstart is associated with the node the blaster will return a default quickstart if one is selected in the quickstart menu. If neither of those situations are true, the system will fallback to the OTP default configuration allowing quickstarts to be associated through a web GUI drag-and-drop action.</P>
+    <P>In order to make an association between a hardware device and a quickstart file, use the drop down menus in the row to select the conductor, then router, then node that the hardware identifier should be configured with. When all selections have been made for all hardware identiiers, click the <strong>Associate Quickstarts</strong> button to submit the associations. The page will refresh and you should then validate the conductor name, router name, and node name with the hardware identifier. If you need to change a node's quickstart association, click the <strong>Clear Quickstart</strong> link in the Action column of the appropriate row and you will then be able to make a new association from the dropdown boxes.</P>
+    <P>If your process is to provision systems in your conductor(s) using the system identifier, the <strong>Fetch Quickstarts</strong> button can be used to query all the conductors configured through the <strong>Manage Conductors</strong> menu to check for nodes whose asset id match any "Blasted" but not "Bootstrapped" nodes. If a match is found, the quickstart will be downloaded from the conductor and the quickstart association will automatically be made.</P>
+    <P>When a node has been blasted and bootstrapped, you may delete the item from the database by clicking the <strong>Delete</strong> link in the Action column of the appropriate row.</P>
 </div>
 {% endblock %}
