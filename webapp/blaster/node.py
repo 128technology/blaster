@@ -16,10 +16,6 @@ from . import constants
 
 bp = Blueprint('node', __name__, url_prefix='/node')
 
-@bp.route('/')
-def menu():
-    return render_template('node_menu.html')
-
 @bp.route('/add/<id>', methods=['POST'])
 def add(id=None):
     if id is None:
@@ -49,26 +45,18 @@ def delete(id=None):
 def list():
     db = get_db()
     nodes = db.execute('select n.id, n.identifier, n.status, n.iso_id, q.conductor_name, q.router_name, q.node_name, q.asset_id FROM node n LEFT JOIN quickstart q ON n.quickstart_id = q.id').fetchall()
+    quickstarts = db.execute('select * FROM quickstart').fetchall()
     print(nodes)
-    return render_template('node_list.html', nodes=nodes)
+    return render_template('node_list.html', nodes=nodes, quickstarts=quickstarts)
 
-@bp.route('/associate', methods=('GET', 'POST'))
+@bp.route('/associate', methods=('POST',))
 def associate():
-    db = get_db()
-    if request.method == 'POST':
-        qs_id = request.form.get('qs_id')
-        identifier = request.form.get('identifier')
-        if qs_id is None or identifier is None:
-            flash("Both a quickstart and node identifier must be selected")
-            return redirect(request.url)
-
+    for identifier in request.form:
+        qs_id = request.form.get(identifier)
         associate_quickstart_to_node(qs_id, identifier)
-        flash(f"made quickstart association for node with identifier of {identifier}")
-        return redirect(request.url)
+        flash(f"Made quickstart association for node with identifier of {identifier}")
+    return redirect(url_for('node.list'))
 
-    quickstarts = db.execute('SELECT id, conductor_name, node_name, router_name FROM quickstart').fetchall()
-    nodes = db.execute('SELECT identifier, quickstart_id from node').fetchall()
-    return render_template('node_quickstart_associate.html', quickstarts=quickstarts, nodes=nodes)
 
 def associate_quickstart_to_node(qs_id, identifier):
     db = get_db()
