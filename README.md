@@ -4,6 +4,29 @@ This repository contains files and instructions that can be used to setup a basi
 
 This software is provided as a 128T Community supported application and is not maintained by 128 Technology officially.  Any issues can be reported through this github repository with no guarantee that a fix will be provided and no SLA for any fix timeframes.
 
+> **Current Release: v1.1, April 22, 2021
+>
+> Updates from v1.0:
+> * Improved memory usage when downloading ISOs
+> * Added button to search all conductors for assets matching hardware identifiers and automatically associate quickstarts
+> * Proxy server support
+> * Ability to disassociate a quickstart from a node after an association has been made
+> * Ability to define custom passwords for root and t128 user to override ISO defaults
+> * Update to handle new 128T Combined ISO format
+> * Self-documentation in web UI
+> * Update Manage nodes page to improve workflow of assigning quickstarts to nodes
+>
+> Note when upgrading from v1.0: A new table has been added to the database.  If you wish to keep your current data and not recreate the DB from scratch, follow this procedure on the docker host after performing the upgrade procedure:
+> ```
+> cd blaster/instance
+> sqlite3 blaster.sqlite
+> CREATE TABLE passwords (
+>   username TEXT PRIMARY KEY,
+>   password_hash TEXT
+> );
+> .quit
+> ```
+ 
 ## Topology ##
 
 ![Blasting Architecture](./Blaster.png)
