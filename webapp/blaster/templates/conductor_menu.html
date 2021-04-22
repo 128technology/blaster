@@ -1,19 +1,10 @@
 {% extends "layout.html" %}
 {% block body %}
-<div class="menu">
-  <h1>Manage Conductors</h1>
+<nav>
+  <h1>Conductors</h1>
   <ul>
       <li><a href="{{ url_for('conductor.list') }}">List Configured Conductors</a>
       <li><a href="{{ url_for('conductor.add') }}">Add Conductor</a>
   </ul>
 </nav>
-</div>
-<div class="help_text">
-  <H2>Managing Conductors</H2>
-  <P>If you wish to use the blaster as a quickstart server for the OTP process, this menu will allow you to configure multiple conductors so that quickstarts can be retrieved by API.</P>
-  <ul>
-    <li><strong>List Configured Conductors</strong> - Show all conductors successfully added to the blaster.  Go here to pull quickstarts from a conductor.
-    <li><strong>Add Conductor</strong> - Add a new conductor to the blaster
-  </ul>
-</div>
 {% endblock %}

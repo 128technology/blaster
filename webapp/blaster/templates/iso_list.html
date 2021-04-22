@@ -1,9 +1,9 @@
 {% extends "layout.html" %}
 {% block body %}
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-<div class="menu">
+<nav>
   <h1>ISOs</h1>
-  <table class="table">
+  <table>
     <tr>
       <th>ISO Name</th>
       <th>Status</th>
@@ -26,13 +26,5 @@
     </tr>
 {%- endfor %}
   </table>
-</div>
-<div class="help_text">
-  <H2>ISO List</H2>
-  <P>This table will show all ISOs that are either staged or in progress of downloading. A status of "Ready" implies that an ISO is staged and ready to be used for blasting. Only one ISO can be active for blasting at a time and is indicated by an "X" in the Active column.  Click the "Set as Active" link next to an ISO to toggle this status.</P>
-  <P>Clicking the "Delete" link will remove the staged ISO from the disk to free up space when it is no longer needed</P>
-  <P>A status of "Processing" indicates a download is in progress.  Depending on Internet connection speed, this should take no more than 30 minutes.  If this status does not change, logs should be investigated. A status of failed indicates there was a problem either downloading or staging the ISO.</P>
-  <P>Relevant logs can be found by entering the docker container via <span class="code">docker exec -it blaster_webapp_1 bash</span> and from there checking the log files found in <span class="code">/var/log/celery</span>.</P>
-  <P>If an ISO fails or is stuck in processing, it should be deleted after investigating the issue.</P>
-</div>
+</nav>
 {% endblock %}

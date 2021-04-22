@@ -1,25 +1,14 @@
 <!doctype html>
-<html>
-  <head>
-    <title>128T Blaster</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-  </head>
-  <body>
-    <header>
-      <div class="container">
-        <a href="{{ url_for('menu.home') }}">Main Menu</a>
-        {% with messages = get_flashed_messages() %}
-        {% if messages %}
-        <u1 class=flashes>
-          {% for message in messages %}
-          <li>{{ message }}</li>
-          {% endfor %}
-        </u1>
-        {% endif %}
-        {% endwith %}
-      </div>
-    </header>
-  {% block body %}
-  {% endblock %}
-  </body>
-</html>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<title>128T Blaster</title>
+<a href="{{ url_for('menu.home') }}">Main Menu</a>
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <u1 class=flashes>
+      {% for message in messages %}
+        <li>{{ message }}</li>
+      {% endfor %}
+    </u1>
+  {% endif %}
+{% endwith %}
+{% block body %}{% endblock %}

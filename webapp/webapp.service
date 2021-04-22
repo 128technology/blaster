@@ -4,7 +4,6 @@ After=network.target
 
 [Service]
 WorkingDirectory=/opt/blaster
-EnvironmentFile=/etc/conf.d/proxy.conf
 ExecStart=/opt/venv/bin/python /opt/run.py --serve-in-foreground
 
 [Install]
