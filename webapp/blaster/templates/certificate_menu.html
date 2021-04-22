@@ -1,10 +1,18 @@
 {% extends "layout.html" %}
 {% block body %}
-<nav>
-  <h1>Certificates</h1>
+<div class="menu">
+  <h1>Manage Certificates</h1>
   <ul>
       <li><a href="{{ url_for('certificate.show') }}">Show Existing Certificate</a>
       <li><a href="{{ url_for('certificate.add') }}">Add Certificate</a>
   </ul>
-</nav>
+</div>
+<div class="help_text">
+  <H2>Managing Certificates</H2>
+  <P>The blaster requires a valid 128T yum certificate in order to download ISOs from the 128T yum server. Please contact your 128T account team for help in obtaining your certificate.</P>
+  <ul>
+    <li><strong>Show Existing Certificate</strong> - If a valid certificate has been uploaded to the blaster, this option will provide detailed information on the certificate. Please note the "Not After" date of the certificate. After this date, the current certificate will no longer be able to retreive ISOs and should be replaced.
+    <li><strong>Add Certificate</strong> - Upload a new certificate or override the existing certificate on this blaster
+  </ul>
+</div>
 {% endblock %}

@@ -52,6 +52,20 @@ BLASTING_INTERFACE=XXX
 ```
 Where `XXX` is the name of the Linux interface connected to the `192.168.128.0/24` network.
 
+### Optionally setting a proxy server ###
+If a proxy server is required in order to initiate outbound HTTPS connections, please edit the file `webapp/proxy.conf` to point to the appropriate proxy server. The format of this parameter is shown below.
+```
+HTTPS_PROXY=http://[username[:password]@]<proxy address>:<proxy port>
+```
+If you modify this file, please be sure to remove the comment at the beginning of the variable.
+
+Note: If this parameter needs to be changed after the initial build of the blaster, please run the following commands on the blaster host to have these changes take effect:
+```
+docker-compose down
+docker-compose build
+docker-compose up -d
+```
+
 ### Bring up the blaster ###
 Use docker-compose to build the monitoring server by running the following command:
 ```
