@@ -24,4 +24,13 @@ def create_app(test_config=None):
     except OSError:
         pass
 
+    from . import certificate
+    app.register_blueprint(certificate.bp)
+
+    from . import menu
+    app.register_blueprint(menu.bp)
+
+    from . import iso
+    app.register_blueprint(iso.bp)
+
     return app

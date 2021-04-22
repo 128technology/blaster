@@ -1,9 +1,9 @@
 {% extends "layout.html" %}
 {% block body %}
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-<div class="menu">
+<nav>
   <h1>Conductors</h1>
-  <table class="table">
+  <table>
     <tr>
       <th>Conductor Name</th>
       <th>Action</th>
@@ -18,10 +18,5 @@
     </tr>
 {%- endfor %}
   </table>
-</div>
-<div class="help_text">
-  <H2>Managing Conductors</H2>
-  <P>This table will list all conductors that have been successfully added to the system. Clicking the "List Nodes" link for a conductor will retreive information about all 128T nodes in that conductor's configuration. This will be displayed on a new page with each node's name, router name, and asset ID shown in a table. A link will be available next to each node allowing you to download the node's quickstart into the blaster.</P>
-  <P>The "Delete" link next to a conductor will remove this entry from the blaster, including the authentication token.</P>
-</div>
+</nav>
 {% endblock %}

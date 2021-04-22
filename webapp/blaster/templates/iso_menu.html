@@ -1,20 +1,11 @@
 {% extends "layout.html" %}
 {% block body %}
-<div class="menu">
-  <h1>Manage ISOs</h1>
+<nav>
+  <h1>ISOs</h1>
   <ul>
       <li><a href="{{ url_for('iso.list_available') }}">List Available ISOs</a>
       <li><a href="{{ url_for('iso.list') }}">List ISOs</a>
       <li><a href="{{ url_for('iso.upload') }}">Upload ISO</a>
   </ul>
-</div>
-<div class="help_text">
-  <H2>Managing ISOs</H2>
-  <P>This page allows you to setup official 128T ISOs and prepare them for PXE booting onto whitebox hardware</P>
-  <ul>
-    <li><strong>List Available ISOs</strong> - Clicking this link will query the official 128T yum repo for available ISOs using a previously staged yum certificate (See the "Manage Certificates" menu for more information). Clicking on any ISO in this list will begin the process to download the selected ISO and stage it for PXE booting.  Progress of the download can be checked in the "List ISOs" menu.
-    <li><strong>List ISOs</strong> - View the list of ISOs that the blaster has attempted to stage for PXE boot, see which ISO is currently active for PXE booting, and see the status of ISO downloads in progress
-    <li><strong>Upload ISO</strong> - Directly upload an official 128T ISO instead of downloading directly from the yum server
-  </ul>
-</div>
+</nav>
 {% endblock %}

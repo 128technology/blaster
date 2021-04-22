@@ -1,9 +1,9 @@
 {% extends "layout.html" %}
 {% block body %}
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-<div class="menu">
+<nav>
   <h1>Quickstarts</h1>
-  <table class="table">
+  <table>
     <tr>
       <th>Conductor</th>
       <th>Router</th>
@@ -39,11 +39,5 @@
     </tr>
 {%- endfor %}
   </table>
-</div>
-<div class="help_text">
-  <H2>Managing Quickstarts</H2>
-  <P>This table lists all of the quickstart files available to use for bootstrapping. Entries can be removed from the blaster by clicking the "Delete" link.</P>
-  <P>A single quickstart can be set as a "default quickstart". A default quickstart will be offered to any system that requests a quickstart and that system's identifier does not exist in the node table (see <strong>Manage Nodes</strong>). Otherwise, a system whose identifier does not exist in the node table will receive a 404 response from the blsater and will fall back to the default OTP configuration, which provides a method to assign a quickstart file through a web GUI using a drag and drop method.</P>
-  <P>Note: In order to be set as a default quickstart, the quickstart must not have an asset identifier. This will instruct the OTP image to set the node's asset id to match the system identifier (typically the system serial number). An asset can be removed from an existing quickstart by clicking the "Remove Asset ID" link. The asset ID cannot be re-added for this quickstart. If a mistake was made, please delete the quickstart and add the quickstart back to the blaster.</P>
-</div>
+</nav>
 {% endblock %}

@@ -1,18 +1,10 @@
 {% extends "layout.html" %}
 {% block body %}
-<div class="menu">
-  <h1>Manage Quickstarts</h1>
+<nav>
+  <h1>Quickstarts</h1>
   <ul>
       <li><a href="{{ url_for('manage_quickstart.add') }}">Add Quickstart</a>
       <li><a href="{{ url_for('manage_quickstart.list') }}">List Quickstarts</a>
   </ul>
-</div>
-<div class="help_text">
-  <H2>Managing Quickstarts</H2>
-  <P>Quickstart files are used to put an initial configuration on a node so that it can, at a minimum, reach the conductor. Quickstarts can be retrieved by the blaster through a conductor's API following the instructions available in the <strong>Manage Conductors</strong> menu.</P>
-  <ul>
-    <li><strong>Add Quickstart</strong> - This option can be used to manually upload a quickstart file to the blaster rather than having the blaster retreive it from a conductor API
-    <li><strong>List Quickstarts</strong> - View and manage quickstarts that have been retreived from conductor APIs or uploaded manually
-  </ul>
-</div>
+</nav>
 {% endblock %}

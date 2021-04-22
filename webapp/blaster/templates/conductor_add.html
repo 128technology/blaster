@@ -1,6 +1,5 @@
 {% extends "layout.html" %}
 {% block body %}
-<div class="menu">
 <H1>Add new Conductor</H1>
 <form method="post" enctype=multipart/form-data>
   <label for="name">Conductor Name</label>
@@ -17,15 +16,4 @@
   <br>
   <input type="submit" value="Add">
 </form>
-</div>
-<div class="help_text">
-  <H2>Managing Conductors</H2>
-  <P>A new conductor can be added to the blaster on this page. Using the provided credentials, the blaster will authenticate to the conductor and create a token. This token will be saved in the blaster's database and used in future communications with this conductor.</P>
-  <ul>
-    <li><strong>Conductor Name</strong> - A free form name you can use to describe this particular conductor
-    <li><strong>Conductor URL</strong> - The URL used to contact the conductor using the format <span class="code">https://&ltconductor IP&gt[:&ltconductor port&gt]</span>
-    <li><strong>Conductor Username</strong> - The username to use when generating an authentication token
-    <li><strong>Conductor Password</strong> - The user's password
-  </ul>
-</div>
 {% endblock %}
