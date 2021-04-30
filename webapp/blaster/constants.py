@@ -1,4 +1,5 @@
 CERT_FILE = 'release.pem'
+SETUP_USERS_FILE = 'setup_users.sh'
 CERTIFICATE_FOLDER = '/opt/instance'
 ALLOWED_EXTENSIONS = {'pem'}
 ISO_REPO_URL = 'https://yum.128technology.com/isos/'

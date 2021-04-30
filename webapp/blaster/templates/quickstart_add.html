@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 {% block body %}
-<nav>
+<div class="menu">
 <h1>Quickstarts</h1>
 <h2>Add New Quickstart</h2>
 <form method="post" enctype=multipart/form-data>
@@ -18,5 +18,14 @@
   <br>
   <input type="submit" value="upload">
 </form>
-</nav>
+</div>
+<div class="help_text">
+  <H2>Managing Quickstarts</H2>
+  <P>This page can be used to upload quickstarts that were manually downloaded from a conductor rather than having the blaster pull the quickstart from a conductor's API.</P>
+  <ul>
+    <li><strong>Conductor</strong> - A free form label to identify which conductor the quickstart is associated with. This value will appear in the quickstart list. This value does not need to match any conductor name in the <strong>Manage Conductor</strong> list.
+    <li><strong>Router Name</strong> - The name of the router. This is also a free form label that will appear in the quickstart list. Please ensure this correctly matches the router the quickstart was pulled from. This value will not be validated against the contents of the quickstart.
+    <li><strong>Description</strong> - A free form description that will appear in the quickstart list
+  </ul>
+</div>
 {% endblock %}
