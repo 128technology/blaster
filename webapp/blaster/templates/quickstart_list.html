@@ -23,7 +23,7 @@
       <td>{% if quickstart['default_quickstart']|int > 0 %}X{% endif %}</td>
       <td>
           <a href="{{ url_for('manage_quickstart.delete', id=quickstart['id']) }}">Delete</a>
-          {% if quickstart['default_quickstart']|int == 0 and quickstart['asset_id'] == None %}
+          {% if quickstart['default_quickstart']|int == 0 and not quickstart['asset_id'] %}
           &nbsp
           <a href="{{ url_for('manage_quickstart.set_as_default', id=quickstart['id']) }}">Set as Default</a>
           {% endif %}
