@@ -25,6 +25,7 @@ import os
 import pathlib
 import re
 import requests
+import stat
 from lxml import html
 from . import constants
 
@@ -86,9 +87,10 @@ def add(name=None):
 @bp.route('/list')
 def list():
     db = get_db()
-    isos = db.execute('SELECT name, status FROM iso').fetchall()
+    isos = db.execute('SELECT id, name, pre_bootstrap_script, post_bootstrap_script, status FROM iso').fetchall()
+    scripts = db.execute('SELECT name FROM script').fetchall()
     active = get_active()
-    return render_template('iso_list.html', isos=isos, active=active)
+    return render_template('iso_list.html', isos=isos, active=active, scripts=scripts)
 
 @bp.route('/delete/<name>')
 def delete(name=None):
@@ -190,3 +192,70 @@ def upload():
             return redirect(url_for('menu.home'))
 
     return render_template('iso_upload.html')
+
+@bp.route('/script_associate', methods=('POST',))
+def associate():
+    for identifier in request.form:
+        script_name = request.form.get(identifier)
+        id_split = identifier.split('_')
+        associate_script_to_iso(id_split[0], id_split[1], script_name)
+        flash(f"Made {id_split[1]}-bootstrap script association for iso id {id_split[0]} and script {script_name}")
+    return redirect(url_for('iso.list'))
+
+def associate_script_to_iso(iso_id, script_type, script_name):
+    db = get_db()
+    entry = db.execute('SELECT name FROM iso WHERE id = ?', (iso_id,)).fetchone()
+    if not entry:
+        flash(f"Error: no ISO found with specified id {iso_id}")
+        return redirect(url_for('iso.list'))
+
+    iso_name = entry['name']
+    if script_type == constants.PRE_BOOTSTRAP:
+        setup_iso_script(iso_name, constants.PRE_BOOTSTRAP, script_name, 'ADD')
+        db.execute('UPDATE iso SET pre_bootstrap_script = ? WHERE id = ?', (script_name, iso_id))
+    elif script_type == constants.POST_BOOTSTRAP:
+        setup_iso_script(iso_name, constants.POST_BOOTSTRAP, script_name, 'ADD')
+        db.execute('UPDATE iso SET post_bootstrap_script = ? WHERE id = ?', (script_name, iso_id))
+    db.commit()
+
+@bp.route('/clear_script/<iso_id>/<script_type>')
+def clear_script(iso_id, script_type):
+    db = get_db()
+    entry = db.execute('SELECT name FROM iso WHERE id = ?', (iso_id,)).fetchone()
+    if not entry:
+        flash(f"Error: no ISO found with specified id {iso_id}")
+        return redirect(url_for('iso.list'))
+
+    iso_name = entry['name']
+    if script_type == constants.PRE_BOOTSTRAP:
+        setup_iso_script(iso_name, constants.PRE_BOOTSTRAP, None, 'DELETE')
+        db.execute('UPDATE iso SET pre_bootstrap_script = null WHERE id = ?', (iso_id,))
+    elif script_type == constants.POST_BOOTSTRAP:
+        setup_iso_script(iso_name, constants.POST_BOOTSTRAP, None, 'DELETE')
+        db.execute('UPDATE iso SET post_bootstrap_script = null WHERE id = ?', (iso_id,))
+    db.commit()
+
+    flash(f"Removed {script_type}-bootstrap-script from iso {iso_name}")
+    return redirect(url_for('iso.list'))
+
+def setup_iso_script(iso_name, script_type, script_name, action):
+    iso_script_file = '/dev/null'
+    if script_type == constants.PRE_BOOTSTRAP:
+        iso_script_file = pathlib.Path(constants.IMAGE_FOLDER) / iso_name / constants.PRE_BOOTSTRAP_FILENAME
+    elif script_type == constants.POST_BOOTSTRAP:
+        iso_script_file = pathlib.Path(constants.IMAGE_FOLDER) / iso_name / constants.POST_BOOTSTRAP_FILENAME
+
+    if action == 'ADD':
+        saved_script_file = pathlib.Path(constants.SCRIPT_FOLDER) / script_name
+        with open(saved_script_file, 'r') as fh:
+            script_contents = fh.read()
+
+        with open(iso_script_file, 'w') as fh:
+            fh.write(script_contents)
+
+        os.chmod(iso_script_file, stat.S_IXUSR)
+    elif action == 'DELETE':
+        try:
+            os.remove(iso_script_file)
+        except OSError:
+            pass
