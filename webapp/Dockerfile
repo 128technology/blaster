@@ -22,6 +22,7 @@ RUN mkdir /etc/conf.d
 COPY conf.d-celery /etc/conf.d/celery
 COPY proxy.conf /etc/conf.d/proxy.conf
 COPY webapp.service /etc/systemd/system
+COPY setup_scripts.sh /opt/
 
 RUN systemctl enable celery
 RUN systemctl enable webapp
@@ -33,5 +34,6 @@ ENV FLASK_APP="blaster.factory"
 
 VOLUME /opt/instance/
 VOLUME /opt/images/
+VOLUME /opt/scripts/
 VOLUME ["/sys/fs/cgroup"]
 ENTRYPOINT ["/usr/sbin/init"]
