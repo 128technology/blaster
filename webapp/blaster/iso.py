@@ -198,16 +198,23 @@ def associate():
     for identifier in request.form:
         script_name = request.form.get(identifier)
         id_split = identifier.split('_')
-        associate_script_to_iso(id_split[0], id_split[1], script_name)
-        flash(f"Made {id_split[1]}-bootstrap script association for iso id {id_split[0]} and script {script_name}")
+        success = associate_script_to_iso(id_split[0], id_split[1], script_name)
+        if success:
+            flash(f"Made {id_split[1]}-bootstrap script association for iso id {id_split[0]} and script {script_name}")
+        else:
+            flash(f"Cannot make script association unless ISO status is 'Ready'")
     return redirect(url_for('iso.list'))
 
 def associate_script_to_iso(iso_id, script_type, script_name):
     db = get_db()
-    entry = db.execute('SELECT name FROM iso WHERE id = ?', (iso_id,)).fetchone()
+    entry = db.execute('SELECT name,status FROM iso WHERE id = ?', (iso_id,)).fetchone()
     if not entry:
         flash(f"Error: no ISO found with specified id {iso_id}")
         return redirect(url_for('iso.list'))
+
+    iso_status = entry['status']
+    if iso_status != 'Ready':
+        return False
 
     iso_name = entry['name']
     if script_type == constants.PRE_BOOTSTRAP:
@@ -217,6 +224,7 @@ def associate_script_to_iso(iso_id, script_type, script_name):
         setup_iso_script(iso_name, constants.POST_BOOTSTRAP, script_name, 'ADD')
         db.execute('UPDATE iso SET post_bootstrap_script = ? WHERE id = ?', (script_name, iso_id))
     db.commit()
+    return True
 
 @bp.route('/clear_script/<iso_id>/<script_type>')
 def clear_script(iso_id, script_type):
