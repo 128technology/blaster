@@ -14,6 +14,7 @@ services:
     build: dhcp/
     image: dhcp
     network_mode: host
+    restart: always
   tftp.bios:
     build: tftp/
     image: tftp
@@ -25,6 +26,7 @@ services:
     networks:
       blasting:
         ipv4_address: 192.168.128.3
+    restart: always
   tftp.uefi:
     build: tftp/
     image: tftp
@@ -36,6 +38,7 @@ services:
     networks:
       blasting:
         ipv4_address: 192.168.128.4
+    restart: always
   webapp:
     build: webapp/
     image: webapp
@@ -47,3 +50,5 @@ services:
       - ./instance:/opt/instance
       - ./instance/exports:/etc/exports
       - ./images:/opt/images
+      - ./scripts:/opt/scripts
+    restart: always
