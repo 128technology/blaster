@@ -9,6 +9,7 @@
     <li><a href="{{ url_for('manage_quickstart.menu') }}">Manage Quickstarts</a>
     <li><a href="{{ url_for('node.list') }}">Manage Nodes</a>
     <li><a href="{{ url_for('password.menu') }}">Manage Passwords</a>
+    <li><a href="{{ url_for('script.menu') }}">Manage Bootstrap Scripts</a>
   </ul>
 </div>
 <div class="help_text">
@@ -21,6 +22,7 @@
     <li><strong>Manage Quickstarts</strong> - View quickstarts currently ready for use with the blaster and upload new quickstarts manually
     <li><strong>Manage Nodes</strong> - View systems that have been blasted, make associations between a specific device and a quickstart file following the OTP process
     <li><strong>Manage Passwords</strong> - Setup passwords to override ISO system default passwords
+    <li><strong>Manage Bootstrap Scripts</strong> - Manage optional scripts that can be associated with ISOs to be setup to be run before or after the bootstrapping process per the <a href="https://docs.128technology.com/docs/intro_otp_iso_install/#scriptlets">bootstrapping documentation</a>.
   </ul>
 </div>
 {% endblock %}

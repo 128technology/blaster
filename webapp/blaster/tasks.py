@@ -16,6 +16,16 @@ COMBINED_ISO_OTP_KS_FILE = 'ks-otp.cfg'
 COMBINED_ISO_OTP_UEFI_KS_FILE = 'ks-otp-uefi.cfg'
 COMBINED_ISO_INTERACTIVE_KS_FILE = 'ks-interactive.cfg'
 COMBINED_ISO_INTERACTIVE_UEFI_KS_FILE = 'ks-interactive-uefi.cfg'
+KS_POST_ADDITIONS = [
+    '%post --nochroot --log=/mnt/sysimage/root/ks-post-blaster.log\n',
+    'INSTALLER_FILES=/mnt/install/repo\n',
+    'INSTALLED_ROOT=/mnt/sysimage\n',
+    '# Blaster specific snippet to stage pre- and post-bootstrap scripts\n',
+    '%include /mnt/install/repo/setup_scripts.sh\n',
+    '# Notify blaster this system has completed blasting\n',
+    'curl -XPOST http://192.168.128.128/node/add/`dmidecode --string system-serial-number`\n',
+    '%end\n'
+]
 
 def iso_file(name):
     return pathlib.Path(constants.IMAGE_FOLDER) / (name + '.iso')
@@ -186,18 +196,15 @@ def stage_image(name):
     print(f"Appending new post section to kickstart to post identifier after blast")
     if combined_iso:
         with open(nfs_dir / COMBINED_ISO_OTP_UEFI_KS_FILE, 'a') as fh:
-            fh.writelines(['%post\n',
-                       'curl -XPOST http://192.168.128.128/node/add/`dmidecode --string system-serial-number`\n',
-                       '%end\n'])
+            fh.writelines(KS_POST_ADDITIONS)
         with open(nfs_dir / COMBINED_ISO_OTP_KS_FILE, 'a') as fh:
-            fh.writelines(['%post\n',
-                       'curl -XPOST http://192.168.128.128/node/add/`dmidecode --string system-serial-number`\n',
-                       '%end\n'])
+            fh.writelines(KS_POST_ADDITIONS)
     else:
         with open(nfs_dir / ks_file, 'a') as fh:
-            fh.writelines(['%post\n',
-                       'curl -XPOST http://192.168.128.128/node/add/`dmidecode --string system-serial-number`\n',
-                       '%end\n'])
+            fh.writelines(KS_POST_ADDITIONS)
+
+    print(f"Setting up snippet to stage bootstrap scripts for image {name}")
+    shutil.copyfile(constants.SCRIPT_KS_SNIPPET, nfs_dir / 'setup_scripts.sh')
 
     print(f"Updating password hashes for image {name}")
     update_password(name)

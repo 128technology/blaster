@@ -1,0 +1,31 @@
+{% extends "layout.html" %}
+{% block body %}
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<div class="menu">
+  <h1>Manage Scripts</h1>
+  <table class="table">
+    <tr>
+      <th>Script Name</th>
+      <th>Description</th>
+      <th>Actions</th>
+    </tr>
+{%- for script in scripts %}
+    <tr>
+      <td>{{ script['name'] }}</td>
+      <td>{{ script['description'] }}</td>
+      <td>
+          <a href="{{ url_for('script.delete', name=script['name']) }}">Delete</a>
+          &nbsp
+          <a href="{{ url_for('script.view', name=script['name']) }}">View</a>
+      </td>
+    </tr>
+{%- endfor %}
+  </table>
+</div>
+<div class="help_text">
+  <H2>Managing Scripts</H2>
+  <P>This table lists all of the scripts available to use for pre-and-post bootstrapping. Entries can be removed from the blaster by clicking the "Delete" link.</P>
+  <P>Deleting a script does not remove it from the kickstart of any ISOs it is currently associated with. Please also remove the script association through the ISO menu.</P>
+  <P>Clicking the "View" link will show the contents of the script. Modifying the script from this view is not supported, if a script needs to be modified please delete the current script and upload the modified version. Then re-associate the script with any ISOs it was previously associated with.</P>
+</div>
+{% endblock %}

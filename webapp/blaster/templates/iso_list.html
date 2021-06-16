@@ -1,12 +1,53 @@
+{% set script_list = [] %}
+{% for script in scripts %}
+<div hidden>{{ script_list.append(script['name']) }}</div>
+{% endfor %}
 {% extends "layout.html" %}
 {% block body %}
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<script language="javascript" type="text/javascript">
+function getObjProps(obj) {
+  var props = [];
+  for (var i in obj) {
+    if (obj.hasOwnProperty(i)) {
+      props.push(i);
+    }
+  }
+  return props.sort();
+}
+function dynamicdropdown(elem)
+{
+  var script_list = {{ script_list | tojson }};
+  var elem_split = elem.id.split('_');
+
+  var associate_form = document.getElementById("script_association");
+  // Delete any children whose name matches this identifier
+  var changed_scripts = associate_form.getElementsByClassName("script_name");
+  for (i = 0; i < changed_scripts.length; i++) {
+    if (changed_scripts[i].name === elem_split[0]) {
+      associate_form.removeChild(changed_scripts[i]);
+    }
+  }
+
+  if (elem.value !== "") {
+    var input = document.createElement("input");
+    input.type = "hidden";
+    input.className = "script_list";
+    input.id = elem.id;
+    input.name = elem.id;
+    input.value = elem.value;
+    associate_form.appendChild(input);
+  }
+}
+</script>
 <div class="menu">
   <h1>ISOs</h1>
   <table class="table">
     <tr>
       <th>ISO Name</th>
       <th>Status</th>
+      <th>Pre-Bootstrap-Script</th>
+      <th>Post-Bootstrap-Script</th>
       <th>Active</th>
       <th>Action</th>
     </tr>
@@ -14,6 +55,30 @@
     <tr>
       <td>{{ iso['name'] }}</td>
       <td>{{ iso['status'] }}</td>
+  {%- if iso['pre_bootstrap_script'] %}
+      <td>{{ iso['pre_bootstrap_script'] }}</td>
+  {%- else %}
+      <td>
+        <select id="{{ iso['id'] }}_pre" name="{{ iso['id'] }}_pre" onchange="javascript: dynamicdropdown(this);">
+          <option value="">Select script</option>
+    {%- for script in script_list %}
+          <option value="{{ script }}">{{ script }}</option>
+    {%- endfor %}
+        </select>
+      </td>
+  {%- endif %}
+  {%- if iso['post_bootstrap_script'] %}
+      <td>{{ iso['post_bootstrap_script'] }}</td>
+  {%- else %}
+      <td>
+        <select id="{{ iso['id'] }}_post" name="{{ iso['id'] }}_post" onchange="javascript: dynamicdropdown(this);">
+          <option value="">Select script</option>
+    {%- for script in script_list %}
+          <option value="{{ script }}">{{ script }}</option>
+    {%- endfor %}
+        </select>
+      </td>
+  {%- endif %}
       <td>{% if active == iso['name'] %}X{% endif %}</td>
       <td>
           <a href="{{ url_for('iso.delete', name=iso['name']) }}">Delete</a>
@@ -22,10 +87,20 @@
           &nbsp<a href="{{ url_for('iso.update_active', name=iso['name']) }}">Set as Active</a>
               {% endif %}
           {% endif %}
+          {% if iso['pre_bootstrap_script'] %}
+          &nbsp<a href="{{ url_for('iso.clear_script', iso_id=iso['id'], script_type='pre') }}">Remove Pre Bootstrap Script</a>
+          {% endif %}
+          {% if iso['post_bootstrap_script'] %}
+          &nbsp<a href="{{ url_for('iso.clear_script', iso_id=iso['id'], script_type='post') }}">Remove Post Bootstrap Script</a>
+          {% endif %}
       </td>
     </tr>
 {%- endfor %}
   </table>
+  <br>
+  <form id="script_association" action="/iso/script_associate" method="post">
+    <input type="Submit" value="Associate Scripts">
+  </form>
 </div>
 <div class="help_text">
   <H2>ISO List</H2>
