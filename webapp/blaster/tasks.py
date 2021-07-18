@@ -73,12 +73,6 @@ def stage_image(name):
 
     try:
         os.system(f"osirrox -indev {iso_file(name)} -extract / {nfs_dir}")
-
-        # If it's already in here, don't re-add it
-        if os.system(f"grep {name} /etc/exports") > 0:
-            fsid = len(open('/etc/exports').readlines())
-            with open('/etc/exports', 'a') as fh:
-                fh.write(f"{nfs_dir} 192.168.128.0/24(fsid={fsid},no_root_squash)\n")
         os.system('exportfs -ra')
     except OSError:
         print(f"There was an error when attempting to setup the NFS share for {name}")
@@ -248,13 +242,6 @@ def remove_image(name):
         print(f"Removed BIOS TFTP image for {name}")
     except (OSError, FileNotFoundError):
         print(f"Error removing BIOS TFTP image for {name}")
-
-    try:
-        os.system(f"sed -i '/{name}/d' /etc/exports")
-        os.system('exportfs -ra')
-        print(f"Removed NFS share for {name} from exports")
-    except Error:
-        print(f"Error removing NFS share for {name} from exports file")
 
     try:
         os.remove(pathlib.Path(constants.UEFI_TFTPBOOT_DIR) / "pxelinux.cfg" / name)
