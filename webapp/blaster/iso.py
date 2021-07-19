@@ -163,10 +163,10 @@ def update_active(name=None):
         os.symlink(name, pathlib.Path(constants.UEFI_TFTPBOOT_DIR) / "pxelinux.cfg" / "default")
         os.symlink(name, pathlib.Path(constants.BIOS_TFTPBOOT_DIR) / "pxelinux.cfg" / "default")
         flash(f"{name} is now the active ISO for blasting")
-        return redirect(url_for('iso.menu'))
+        return redirect(url_for('iso.list'))
     except Error:
         flash("There was an unspecified error updating the active ISO")
-        return redirect(url_for('iso.menu'))
+        return redirect(url_for('iso.list'))
 
 @bp.route('/upload', methods=('GET', 'POST'))
 def upload():
@@ -312,7 +312,10 @@ def get_post_install_action(iso_name):
                 actions.append('undefined')
 
     if _list_equal(actions):
-        return actions[0]
+        try:
+            return actions[0]
+        except IndexError:
+            return 'undefined'
 
     return 'undefined'
 
