@@ -200,9 +200,6 @@ def upload():
 @bp.route('/update_iso_options', methods=('POST',))
 def update_iso_options():
     jd = request.json
-    with open('/tmp/test', 'w') as fh:
-        fh.write(str(jd))
-
     scripts = jd["scripts"]
     pias = jd["post_install_actions"]
     
