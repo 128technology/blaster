@@ -90,7 +90,11 @@ def list():
     isos = db.execute('SELECT id, name, pre_bootstrap_script, post_bootstrap_script, status FROM iso').fetchall()
     scripts = db.execute('SELECT name FROM script').fetchall()
     active = get_active()
-    return render_template('iso_list.html', isos=isos, active=active, scripts=scripts)
+    pias={}
+    for iso in isos:
+        pias[iso[1]] = get_post_install_action(iso[1])
+
+    return render_template('iso_list.html', isos=isos, active=active, scripts=scripts, post_install_actions=pias)
 
 @bp.route('/delete/<name>')
 def delete(name=None):
@@ -193,16 +197,31 @@ def upload():
 
     return render_template('iso_upload.html')
 
-@bp.route('/script_associate', methods=('POST',))
-def associate():
-    for identifier in request.form:
-        script_name = request.form.get(identifier)
+@bp.route('/update_iso_options', methods=('POST',))
+def update_iso_options():
+    jd = request.json
+    with open('/tmp/test', 'w') as fh:
+        fh.write(str(jd))
+
+    scripts = jd["scripts"]
+    pias = jd["post_install_actions"]
+    
+    for identifier, script_name in scripts.items():
         id_split = identifier.split('_')
         success = associate_script_to_iso(id_split[0], id_split[1], script_name)
         if success:
             flash(f"Made {id_split[1]}-bootstrap script association for iso id {id_split[0]} and script {script_name}")
         else:
             flash(f"Cannot make script association unless ISO status is 'Ready'")
+
+    for identifier, state in pias.items():
+        id_split = identifier.split('_')
+        success = set_post_install_action(id_split[0], state)
+        if success:
+            flash(f"Changed ISO {id_split[0]} post install action to {state}")
+        else:
+            flash(f"Cannot change post install action unless ISO status is 'Ready'")
+
     return redirect(url_for('iso.list'))
 
 def associate_script_to_iso(iso_id, script_type, script_name):
@@ -267,3 +286,68 @@ def setup_iso_script(iso_name, script_type, script_name, action):
             os.remove(iso_script_file)
         except OSError:
             pass
+
+def _list_equal(_list):
+    iterator = iter(_list)
+    try:
+        first = next(iterator)
+    except StopIteration:
+        return True
+    return all(first == x for x in iterator)
+
+def get_post_install_action(iso_name):
+    ks_files = [
+        constants.COMBINED_ISO_OTP_KS_FILE,
+        constants.COMBINED_ISO_OTP_UEFI_KS_FILE,
+        constants.LEGACY_OTP_KICKSTART_FILE,
+        constants.LEGACY_STANDARD_KICKSTART_FILE,
+    ]
+
+    actions = []
+    for ks_filename in ks_files:
+        ks_file = pathlib.Path(constants.IMAGE_FOLDER) / iso_name / ks_filename
+        if ks_file.exists():
+            if 'shutdown' in ks_file.read_text():
+                actions.append('shutdown')
+            elif 'reboot' in ks_file.read_text():
+                actions.append('reboot')
+            else:
+                actions.append('undefined')
+
+    if _list_equal(actions):
+        return actions[0]
+
+    return 'undefined'
+
+def set_post_install_action(iso_id, action):
+    db = get_db()
+    entry = db.execute('SELECT name,status FROM iso WHERE id = ?', (iso_id,)).fetchone()
+    if not entry:
+        flash(f"Error: no ISO found with specified id {iso_id}")
+        return redirect(url_for('iso.list'))
+
+    iso_status = entry['status']
+    if iso_status != 'Ready':
+        return False
+
+    iso_name = entry['name']
+
+    ACTION_FLIP = {
+        'reboot': 'shutdown',
+        'shutdown': 'reboot',
+    }
+
+    ks_files = [
+        constants.COMBINED_ISO_OTP_KS_FILE,
+        constants.COMBINED_ISO_OTP_UEFI_KS_FILE,
+        constants.LEGACY_OTP_KICKSTART_FILE,
+        constants.LEGACY_STANDARD_KICKSTART_FILE,
+    ]
+
+    for ks_filename in ks_files:
+        ks_file = pathlib.Path(constants.IMAGE_FOLDER) / iso_name / ks_filename
+        if ks_file.exists():
+            new_contents = ks_file.read_text().replace(ACTION_FLIP[action], action)
+            ks_file.write_text(new_contents)
+
+    return True

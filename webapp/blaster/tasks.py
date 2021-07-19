@@ -10,12 +10,6 @@ from blaster import constants
 
 celery = Celery('tasks', broker='redis://localhost:6379/0')
 
-LEGACY_OTP_KICKSTART_FILE = 'ks.cfg'
-LEGACY_STANDARD_KICKSTART_FILE = '128T-ks.cfg'
-COMBINED_ISO_OTP_KS_FILE = 'ks-otp.cfg'
-COMBINED_ISO_OTP_UEFI_KS_FILE = 'ks-otp-uefi.cfg'
-COMBINED_ISO_INTERACTIVE_KS_FILE = 'ks-interactive.cfg'
-COMBINED_ISO_INTERACTIVE_UEFI_KS_FILE = 'ks-interactive-uefi.cfg'
 KS_POST_ADDITIONS = [
     '%post --nochroot --log=/mnt/sysimage/root/ks-post-blaster.log\n',
     'INSTALLER_FILES=/mnt/install/repo\n',
@@ -80,16 +74,16 @@ def stage_image(name):
         return False
 
     combined_iso = False
-    if (nfs_dir / LEGACY_OTP_KICKSTART_FILE).exists():
-        ks_file = LEGACY_OTP_KICKSTART_FILE
+    if (nfs_dir / constants.LEGACY_OTP_KICKSTART_FILE).exists():
+        ks_file = constants.LEGACY_OTP_KICKSTART_FILE
         print(f"{name} is a legacy format OTP ISO based on the kickstart file found")
-    elif (nfs_dir / LEGACY_STANDARD_KICKSTART_FILE).exists():
-        ks_file = LEGACY_STANDARD_KICKSTART_FILE
+    elif (nfs_dir / constants.LEGACY_STANDARD_KICKSTART_FILE).exists():
+        ks_file = constants.LEGACY_STANDARD_KICKSTART_FILE
         print(f"{name} is a legacy format standard ISO based on the kickstart file found")
-    elif (nfs_dir / COMBINED_ISO_OTP_KS_FILE).exists() and \
-         (nfs_dir / COMBINED_ISO_OTP_UEFI_KS_FILE).exists() and \
-         (nfs_dir / COMBINED_ISO_INTERACTIVE_KS_FILE).exists() and \
-         (nfs_dir / COMBINED_ISO_INTERACTIVE_UEFI_KS_FILE).exists():
+    elif (nfs_dir / constants.COMBINED_ISO_OTP_KS_FILE).exists() and \
+         (nfs_dir / constants.COMBINED_ISO_OTP_UEFI_KS_FILE).exists() and \
+         (nfs_dir / constants.COMBINED_ISO_INTERACTIVE_KS_FILE).exists() and \
+         (nfs_dir / constants.COMBINED_ISO_INTERACTIVE_UEFI_KS_FILE).exists():
         print(f"{name} is a combined ISO based on the kickstart files found")
         combined_iso = True
     else:
@@ -130,7 +124,7 @@ def stage_image(name):
                       f"  kernel images/{name}/vmlinuz\n",
                       f"  append initrd=http://{constants.UEFI_IP}/images/{name}/initrd.img "
                       f"inst.stage2=nfs:{constants.NFS_IP}:{ pathlib.Path(constants.IMAGE_FOLDER) / name } "
-                      f"inst.ks=nfs:{constants.NFS_IP}:{ pathlib.Path(constants.IMAGE_FOLDER) / name }/{ COMBINED_ISO_OTP_UEFI_KS_FILE } "
+                      f"inst.ks=nfs:{constants.NFS_IP}:{ pathlib.Path(constants.IMAGE_FOLDER) / name }/{ constants.COMBINED_ISO_OTP_UEFI_KS_FILE } "
                        "console=ttyS0,115200n81\n",
                      ])
     else:
@@ -167,7 +161,7 @@ def stage_image(name):
                       f"  kernel images/{name}/vmlinuz\n",
                       f"  append initrd=images/{name}/initrd.img "
                       f"inst.stage2=nfs:{constants.NFS_IP}:{ pathlib.Path(constants.IMAGE_FOLDER) / name } "
-                      f"inst.ks=nfs:{constants.NFS_IP}:{ pathlib.Path(constants.IMAGE_FOLDER) / name }/{ COMBINED_ISO_OTP_KS_FILE } "
+                      f"inst.ks=nfs:{constants.NFS_IP}:{ pathlib.Path(constants.IMAGE_FOLDER) / name }/{ constants.COMBINED_ISO_OTP_KS_FILE } "
                        "console=ttyS0,115200n81\n",
                      ])
     else:
@@ -189,9 +183,9 @@ def stage_image(name):
 
     print(f"Appending new post section to kickstart to post identifier after blast")
     if combined_iso:
-        with open(nfs_dir / COMBINED_ISO_OTP_UEFI_KS_FILE, 'a') as fh:
+        with open(nfs_dir / constants.COMBINED_ISO_OTP_UEFI_KS_FILE, 'a') as fh:
             fh.writelines(KS_POST_ADDITIONS)
-        with open(nfs_dir / COMBINED_ISO_OTP_KS_FILE, 'a') as fh:
+        with open(nfs_dir / constants.COMBINED_ISO_OTP_KS_FILE, 'a') as fh:
             fh.writelines(KS_POST_ADDITIONS)
     else:
         with open(nfs_dir / ks_file, 'a') as fh:
