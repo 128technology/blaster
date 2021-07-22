@@ -277,4 +277,6 @@ case $OS in
     exit 1
 esac
 
-echo -e "${GREEN}Blaster setup complete, you may now continue to build and start the containers!${NC}"
+echo -e "${GREEN}Network setup complete, building and starting the containers${NC}"
+docker-compose up -d
+echo -e "${GREEN}Blaster setup complete!${NC}"
