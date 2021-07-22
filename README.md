@@ -4,28 +4,15 @@ This repository contains files and instructions that can be used to setup a basi
 
 This software is provided as a 128T Community supported application and is not maintained by 128 Technology officially.  Any issues can be reported through this github repository with no guarantee that a fix will be provided and no SLA for any fix timeframes.
 
-> **Current Release: v1.1, April 22, 2021
+> **Current Release: v1.2, July 22, 2021
 >
-> Updates from v1.0:
-> * Improved memory usage when downloading ISOs
-> * Added button to search all conductors for assets matching hardware identifiers and automatically associate quickstarts
-> * Proxy server support
-> * Ability to disassociate a quickstart from a node after an association has been made
-> * Ability to define custom passwords for root and t128 user to override ISO defaults
-> * Update to handle new 128T Combined ISO format
-> * Self-documentation in web UI
-> * Update Manage nodes page to improve workflow of assigning quickstarts to nodes
->
-> Note when upgrading from v1.0: A new table has been added to the database.  If you wish to keep your current data and not recreate the DB from scratch, follow this procedure on the docker host after performing the upgrade procedure:
-> ```
-> cd blaster/instance
-> sqlite3 blaster.sqlite
-> CREATE TABLE passwords (
->   username TEXT PRIMARY KEY,
->   password_hash TEXT
-> );
-> .quit
-> ```
+> Updates from v1.1:
+> Introduced database schema versions - no more need to manually handle tables on upgrades (including this one)
+> Allow toggling of ISO post install behavior between default "shutdown" and "reboot" - useful when using a default quickstart
+> Simplified NFS setup - hopefully eliminate any NFS issues mounting ISOs
+> Support for bootstrap scipts - place pre- and/or post- bootstrap scripts into an ISO so they will be run during bootstrapping
+> Docker containers start automatically after a host reboot
+> new setup script - allows for easier turn up of blaster
  
 ## Topology ##
 
@@ -36,44 +23,18 @@ The above drawing illustrates the architecture of the Blaster.  The blasting ser
 ## Server Setup ##
 The minimum requirements for the blaster server are 2 cores and 4GB RAM.  It is possible to run the blaster virtualized, but additional considerations need to be made.  The docker containers each use a unique MAC address which may conflict with a hypervisor's port security.  In this case, port security features must be disabled and potentially promiscuous mode turned on in the hypervisor's settings.  Additionally, the Linux OS for the guest may need promiscuous mode enabled on the second interface.
 
-These instructions are based on a host system installed from a CentOS 1804 image.  Other Linux OS variants should be usable provided the setup instructions are modified appropriately.  The blasting interface must be configured with the static IP address of `192.168.128.128/24`.  Any software firewalls should be disabled on the blasting interface and set to allow HTTP and SSH traffic in on the management interface.
+These instructions are based on a host system installed from a CentOS 1804 image. Since the blaster is mostly docker powered, this should be portable to other OSes. However, the setup script has not been extended to automatically handle all variants. You may try another OS at your own risk by looking at the [legacy installation instructions](docs/INSTALL.md) and modifying for your Linux distro.
 
-Please ensure that the server is not running the rpcbind service as this will conflict with the NFS capabilities of the blaster.
+To setup the blaster, as root run the following commands:
+````
+yum -y install git
+git clone https://github.com/128technology/blaster.git
+cd blaster
+./setup.sh
+docker-compose build
+docker-compose up -d
 ```
-systemctl stop rpcbind
-systemctl disable rpcbind
-```
-
-The blaster software is distributed through git and installed through docker.  The following sections should be run as root
-
-### Install docker and docker compose ###
-We will use docker to rapidly deploy the setup.  Please use the following commands to install docker:
-```
-yum-config-manager \
-    --add-repo \
-    https://download.docker.com/linux/centos/docker-ce.repo
-
-yum install docker-ce docker-ce-cli containerd.io
-```
-
-Once docker is installed, start and enable the docker service:
-```
-systemctl start docker
-systemctl enable docker
-```
-
-Install docker-compose to be able to build the monitoring server from the provided docker-compose.yml file:
-```
-curl -L "https://github.com/docker/compose/releases/download/1.25.5/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-chmod +x /usr/local/bin/docker-compose
-```
-
-### Setup the environment file for variables  ###
-Please create a file called `.env` in the root directory of the repo.  Its contents should resemble:
-```
-BLASTING_INTERFACE=XXX
-```
-Where `XXX` is the name of the Linux interface connected to the `192.168.128.0/24` network.
+The setup scripts will attempt to determine your management and blasting interfaces as shown in the drawing above, but please be prepared to indicate the appropriate Linux interfaces connected to each network.
 
 ### Optionally setting a proxy server ###
 If a proxy server is required in order to initiate outbound HTTPS connections, please edit the file `webapp/proxy.conf` to point to the appropriate proxy server. The format of this parameter is shown below.
@@ -82,27 +43,7 @@ HTTPS_PROXY=http://[username[:password]@]<proxy address>:<proxy port>
 ```
 If you modify this file, please be sure to remove the comment at the beginning of the variable.
 
-Note: If this parameter needs to be changed after the initial build of the blaster, please run the following commands on the blaster host to have these changes take effect:
-```
-docker-compose down
-docker-compose build
-docker-compose up -d
-```
-
-### Bring up the blaster ###
-Use docker-compose to build the monitoring server by running the following command:
-```
-docker-compose up -d
-```
-
-### Initialize the DB ###
-The first time you setup the blaster on a host machine, you need to initialize the DB.  This can be done with the following commands:
-```
-docker exec -it blaster_webapp_1 bash
-cd /opt
-flask init-db
-exit
-```
+If this variable is changed after building and starting the containers, please bring down and rebuild the containers as shown in the upgrade commands below.
 
 ## Upgrading the Blaster ##
 If new updates are available in the git repo, the following steps can be used to update your blaster:
@@ -128,5 +69,11 @@ If you wish to use the blaster as a quickstart server, you may want to use this 
 ### Quickstart Management ###
 This menu allows you to view all quickstarts staged on the blaster for bootstrapping and manually upload individual quickstarts.
 
-### Manage Nodes ###
+### Node Management ###
 After a node has been blasted with an ISO, it will show up in this page allowing you to assign a quickstart file for bootstrapping.
+
+### Password Management ###
+You can override the generic ISO passwords with your own passwords for the root and t128 user. After making changes here these, need to be pushed to the ISOs by using the "Update ISOs" button
+
+### Bootstrap Script Management ###
+The bootstrapping process allows for scripts to be run pre- and post- bootstrapping, as shown in the [OTP documentation](https://docs.128technology.com/docs/intro_otp_iso_install/#scriptlets). These can be any script executable from the shell. The blaster does not validate these scripts, you must test and validate them yourself. The bootstrapping process expects the scripts to return and will then reboot the system, so a script calling `shutdown` will not work. A sample script is included showing how to stage a one-time shutdown script so that the system will power off after bootstrapping has fully completed.
