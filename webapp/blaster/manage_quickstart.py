@@ -86,20 +86,20 @@ def delete(id=None):
 def set_as_default(id=None):
     if id is None:
         flash("No quickstart specified for set as default action")
-        return redirect(url_for('manage_quickstart.list'))
+        return redirect(url_for('manage_quickstart.menu'))
 
     clear_default_qs()
     db = get_db()
     db.execute('UPDATE quickstart SET default_quickstart = 1 WHERE id = ?', (id,))
     db.commit()
     flash("Updated default quickstart")
-    return redirect(url_for('manage_quickstart.menu'))
+    return redirect(url_for('manage_quickstart.list'))
 
 @bp.route('/clear_default')
 def clear_default():
     clear_default_qs()
     flash("Cleared default quickstart")
-    return redirect(url_for('manage_quickstart.menu'))
+    return redirect(url_for('manage_quickstart.list'))
 
 def clear_default_qs():
     db = get_db()
@@ -111,10 +111,10 @@ def clear_default_qs():
 def remove_asset(id=None):
     if id is None:
         flash("No quickstart specified for set as default action")
-        return redirect(url_for('manage_quickstart.list'))
+        return redirect(url_for('manage_quickstart.menu'))
 
     db = get_db()
     db.execute('UPDATE quickstart SET asset_id = NULL WHERE id = ?', (id,))
     db.commit()
     flash("Removed asset_id from quickstart")
-    return redirect(url_for('manage_quickstart.menu'))
+    return redirect(url_for('manage_quickstart.list'))
