@@ -95,8 +95,9 @@ function systemd_setup_services {
   systemctl stop rpcbind.socket
   systemctl disable rpcbind.socket
   echo "Starting and enabling docker"
-  systemctl start docker
-  systemctl enable docker
+  systemctl start docker.service
+  systemctl enable docker.service
+  systemctl enable iptables.service
 }
 
 function find_management_interface {
