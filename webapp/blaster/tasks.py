@@ -10,12 +10,16 @@ from blaster import constants
 
 celery = Celery('tasks', broker='redis://localhost:6379/0')
 
-LEGACY_OTP_KICKSTART_FILE = 'ks.cfg'
-LEGACY_STANDARD_KICKSTART_FILE = '128T-ks.cfg'
-COMBINED_ISO_OTP_KS_FILE = 'ks-otp.cfg'
-COMBINED_ISO_OTP_UEFI_KS_FILE = 'ks-otp-uefi.cfg'
-COMBINED_ISO_INTERACTIVE_KS_FILE = 'ks-interactive.cfg'
-COMBINED_ISO_INTERACTIVE_UEFI_KS_FILE = 'ks-interactive-uefi.cfg'
+KS_POST_ADDITIONS = [
+    '%post --nochroot --log=/mnt/sysimage/root/ks-post-blaster.log\n',
+    'INSTALLER_FILES=/mnt/install/repo\n',
+    'INSTALLED_ROOT=/mnt/sysimage\n',
+    '# Blaster specific snippet to stage pre- and post-bootstrap scripts\n',
+    '%include /mnt/install/repo/setup_scripts.sh\n',
+    '# Notify blaster this system has completed blasting\n',
+    'curl -XPOST http://192.168.128.128/node/add/`dmidecode --string system-serial-number`\n',
+    '%end\n'
+]
 
 def iso_file(name):
     return pathlib.Path(constants.IMAGE_FOLDER) / (name + '.iso')
@@ -63,12 +67,6 @@ def stage_image(name):
 
     try:
         os.system(f"osirrox -indev {iso_file(name)} -extract / {nfs_dir}")
-
-        # If it's already in here, don't re-add it
-        if os.system(f"grep {name} /etc/exports") > 0:
-            fsid = len(open('/etc/exports').readlines())
-            with open('/etc/exports', 'a') as fh:
-                fh.write(f"{nfs_dir} 192.168.128.0/24(fsid={fsid},no_root_squash)\n")
         os.system('exportfs -ra')
     except OSError:
         print(f"There was an error when attempting to setup the NFS share for {name}")
@@ -76,16 +74,16 @@ def stage_image(name):
         return False
 
     combined_iso = False
-    if (nfs_dir / LEGACY_OTP_KICKSTART_FILE).exists():
-        ks_file = LEGACY_OTP_KICKSTART_FILE
+    if (nfs_dir / constants.LEGACY_OTP_KICKSTART_FILE).exists():
+        ks_file = constants.LEGACY_OTP_KICKSTART_FILE
         print(f"{name} is a legacy format OTP ISO based on the kickstart file found")
-    elif (nfs_dir / LEGACY_STANDARD_KICKSTART_FILE).exists():
-        ks_file = LEGACY_STANDARD_KICKSTART_FILE
+    elif (nfs_dir / constants.LEGACY_STANDARD_KICKSTART_FILE).exists():
+        ks_file = constants.LEGACY_STANDARD_KICKSTART_FILE
         print(f"{name} is a legacy format standard ISO based on the kickstart file found")
-    elif (nfs_dir / COMBINED_ISO_OTP_KS_FILE).exists() and \
-         (nfs_dir / COMBINED_ISO_OTP_UEFI_KS_FILE).exists() and \
-         (nfs_dir / COMBINED_ISO_INTERACTIVE_KS_FILE).exists() and \
-         (nfs_dir / COMBINED_ISO_INTERACTIVE_UEFI_KS_FILE).exists():
+    elif (nfs_dir / constants.COMBINED_ISO_OTP_KS_FILE).exists() and \
+         (nfs_dir / constants.COMBINED_ISO_OTP_UEFI_KS_FILE).exists() and \
+         (nfs_dir / constants.COMBINED_ISO_INTERACTIVE_KS_FILE).exists() and \
+         (nfs_dir / constants.COMBINED_ISO_INTERACTIVE_UEFI_KS_FILE).exists():
         print(f"{name} is a combined ISO based on the kickstart files found")
         combined_iso = True
     else:
@@ -126,7 +124,7 @@ def stage_image(name):
                       f"  kernel images/{name}/vmlinuz\n",
                       f"  append initrd=http://{constants.UEFI_IP}/images/{name}/initrd.img "
                       f"inst.stage2=nfs:{constants.NFS_IP}:{ pathlib.Path(constants.IMAGE_FOLDER) / name } "
-                      f"inst.ks=nfs:{constants.NFS_IP}:{ pathlib.Path(constants.IMAGE_FOLDER) / name }/{ COMBINED_ISO_OTP_UEFI_KS_FILE } "
+                      f"inst.ks=nfs:{constants.NFS_IP}:{ pathlib.Path(constants.IMAGE_FOLDER) / name }/{ constants.COMBINED_ISO_OTP_UEFI_KS_FILE } "
                        "console=ttyS0,115200n81\n",
                      ])
     else:
@@ -163,7 +161,7 @@ def stage_image(name):
                       f"  kernel images/{name}/vmlinuz\n",
                       f"  append initrd=images/{name}/initrd.img "
                       f"inst.stage2=nfs:{constants.NFS_IP}:{ pathlib.Path(constants.IMAGE_FOLDER) / name } "
-                      f"inst.ks=nfs:{constants.NFS_IP}:{ pathlib.Path(constants.IMAGE_FOLDER) / name }/{ COMBINED_ISO_OTP_KS_FILE } "
+                      f"inst.ks=nfs:{constants.NFS_IP}:{ pathlib.Path(constants.IMAGE_FOLDER) / name }/{ constants.COMBINED_ISO_OTP_KS_FILE } "
                        "console=ttyS0,115200n81\n",
                      ])
     else:
@@ -185,19 +183,16 @@ def stage_image(name):
 
     print(f"Appending new post section to kickstart to post identifier after blast")
     if combined_iso:
-        with open(nfs_dir / COMBINED_ISO_OTP_UEFI_KS_FILE, 'a') as fh:
-            fh.writelines(['%post\n',
-                       'curl -XPOST http://192.168.128.128/node/add/`dmidecode --string system-serial-number`\n',
-                       '%end\n'])
-        with open(nfs_dir / COMBINED_ISO_OTP_KS_FILE, 'a') as fh:
-            fh.writelines(['%post\n',
-                       'curl -XPOST http://192.168.128.128/node/add/`dmidecode --string system-serial-number`\n',
-                       '%end\n'])
+        with open(nfs_dir / constants.COMBINED_ISO_OTP_UEFI_KS_FILE, 'a') as fh:
+            fh.writelines(KS_POST_ADDITIONS)
+        with open(nfs_dir / constants.COMBINED_ISO_OTP_KS_FILE, 'a') as fh:
+            fh.writelines(KS_POST_ADDITIONS)
     else:
         with open(nfs_dir / ks_file, 'a') as fh:
-            fh.writelines(['%post\n',
-                       'curl -XPOST http://192.168.128.128/node/add/`dmidecode --string system-serial-number`\n',
-                       '%end\n'])
+            fh.writelines(KS_POST_ADDITIONS)
+
+    print(f"Setting up snippet to stage bootstrap scripts for image {name}")
+    shutil.copyfile(constants.SCRIPT_KS_SNIPPET, nfs_dir / 'setup_scripts.sh')
 
     print(f"Updating password hashes for image {name}")
     update_password(name)
@@ -241,13 +236,6 @@ def remove_image(name):
         print(f"Removed BIOS TFTP image for {name}")
     except (OSError, FileNotFoundError):
         print(f"Error removing BIOS TFTP image for {name}")
-
-    try:
-        os.system(f"sed -i '/{name}/d' /etc/exports")
-        os.system('exportfs -ra')
-        print(f"Removed NFS share for {name} from exports")
-    except Error:
-        print(f"Error removing NFS share for {name} from exports file")
 
     try:
         os.remove(pathlib.Path(constants.UEFI_TFTPBOOT_DIR) / "pxelinux.cfg" / name)

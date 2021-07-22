@@ -1,12 +1,65 @@
+{% set script_list = [] %}
+{% for script in scripts %}
+<div hidden>{{ script_list.append(script['name']) }}</div>
+{% endfor %}
 {% extends "layout.html" %}
 {% block body %}
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<script language="javascript" type="text/javascript">
+function getObjProps(obj) {
+  var props = [];
+  for (var i in obj) {
+    if (obj.hasOwnProperty(i)) {
+      props.push(i);
+    }
+  }
+  return props.sort();
+}
+
+function submitChanges()
+{
+  script_selects = document.getElementsByClassName("script_select")
+  var scripts = {};
+  for (i = 0; i < script_selects.length; i++) {
+    script_select = script_selects[i];
+    if (script_select.selectedIndex > 0) {
+      value = script_select.options[script_select.selectedIndex].text;
+      name = script_select.getAttribute("name");
+      scripts[name] = value;
+    }
+  }
+
+  post_install_selects = document.getElementsByClassName("post_select")
+  var pias = {};
+  for (i = 0; i < post_install_selects.length; i++) {
+    post_install_select = post_install_selects[i];
+    if (post_install_select.selectedIndex > 0) {
+      value = post_install_select.options[post_install_select.selectedIndex].text;
+      name = post_install_select.getAttribute("name");
+      pias[name] = value;
+    }
+  }
+
+  var xhr = new XMLHttpRequest();
+  var url = "/iso/update_iso_options";
+  xhr.addEventListener("load", function() {
+    location.reload();
+  });
+  xhr.open("POST", url, true);
+  xhr.setRequestHeader("Content-Type", "application/json");
+  var data = JSON.stringify({"scripts": scripts, "post_install_actions": pias});
+  xhr.send(data);
+}
+</script>
 <div class="menu">
   <h1>ISOs</h1>
   <table class="table">
     <tr>
       <th>ISO Name</th>
       <th>Status</th>
+      <th>Post-Install Action</th>
+      <th>Pre-Bootstrap-Script</th>
+      <th>Post-Bootstrap-Script</th>
       <th>Active</th>
       <th>Action</th>
     </tr>
@@ -14,6 +67,36 @@
     <tr>
       <td>{{ iso['name'] }}</td>
       <td>{{ iso['status'] }}</td>
+      <td>
+        <select class="post_select" id="{{ iso['id'] }}_post_install_action" name="{{ iso['id'] }}_post_install_action" onchange="">
+          <option value="current">{{ post_install_actions[iso['name']] }}</option>
+          <option value="alternate">{% if post_install_actions[iso['name']] == "shutdown" %}reboot{% else %}shutdown{% endif %}</option>
+        </select>
+      </td>
+  {%- if iso['pre_bootstrap_script'] %}
+      <td>{{ iso['pre_bootstrap_script'] }}</td>
+  {%- else %}
+      <td>
+        <select class="script_select" id="{{ iso['id'] }}_pre" name="{{ iso['id'] }}_pre" onchange="">
+          <option value="">Select script</option>
+    {%- for script in script_list %}
+          <option value="{{ script }}">{{ script }}</option>
+    {%- endfor %}
+        </select>
+      </td>
+  {%- endif %}
+  {%- if iso['post_bootstrap_script'] %}
+      <td>{{ iso['post_bootstrap_script'] }}</td>
+  {%- else %}
+      <td>
+        <select class="script_select" id="{{ iso['id'] }}_post" name="{{ iso['id'] }}_post" onchange="">
+          <option value="">Select script</option>
+    {%- for script in script_list %}
+          <option value="{{ script }}">{{ script }}</option>
+    {%- endfor %}
+        </select>
+      </td>
+  {%- endif %}
       <td>{% if active == iso['name'] %}X{% endif %}</td>
       <td>
           <a href="{{ url_for('iso.delete', name=iso['name']) }}">Delete</a>
@@ -22,10 +105,18 @@
           &nbsp<a href="{{ url_for('iso.update_active', name=iso['name']) }}">Set as Active</a>
               {% endif %}
           {% endif %}
+          {% if iso['pre_bootstrap_script'] %}
+          &nbsp<a href="{{ url_for('iso.clear_script', iso_id=iso['id'], script_type='pre') }}">Remove Pre Bootstrap Script</a>
+          {% endif %}
+          {% if iso['post_bootstrap_script'] %}
+          &nbsp<a href="{{ url_for('iso.clear_script', iso_id=iso['id'], script_type='post') }}">Remove Post Bootstrap Script</a>
+          {% endif %}
       </td>
     </tr>
 {%- endfor %}
   </table>
+  <br>
+  <input type="Submit" value="Submit Changes" onclick="javascript: submitChanges();">
 </div>
 <div class="help_text">
   <H2>ISO List</H2>

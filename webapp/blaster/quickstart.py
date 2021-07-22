@@ -20,7 +20,10 @@ def instantiate(instance=None):
     if node_row is None:
         qs_row = db.execute('SELECT node_name, asset_id, config FROM quickstart WHERE default_quickstart > 0').fetchone()
     else:
-        qs_row = db.execute('SELECT node_name, asset_id, config FROM quickstart WHERE id = ?', (node_row['quickstart_id'],)).fetchone()
+        if node_row[0] is None:
+            qs_row = db.execute('SELECT node_name, asset_id, config FROM quickstart WHERE default_quickstart > 0').fetchone()
+        else:
+            qs_row = db.execute('SELECT node_name, asset_id, config FROM quickstart WHERE id = ?', (node_row['quickstart_id'],)).fetchone()
 
     if qs_row is None:
         return jsonify(error="Could not find a specific or default quickstart"), 404

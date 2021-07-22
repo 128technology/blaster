@@ -1,0 +1,18 @@
+{% extends "layout.html" %}
+{% block body %}
+<div class="menu">
+  <h1>Manage Bootstrap Scripts</h1>
+  <ul>
+      <li><a href="{{ url_for('script.add') }}">Add Script</a>
+      <li><a href="{{ url_for('script.list') }}">List Scripts</a>
+  </ul>
+</div>
+<div class="help_text">
+  <H2>Managing Bootstrap Scripts</H2>
+  <P>Scripts can be used to execute commands on the node before or after the bootstrapping procedure is completed. This menu makes no distinction between a <strong>pre-bootstrap-script</strong> or a <strong>post-bootstrap-script</strong>, that distinction is made when associating the scripts with the ISO through the <strong>Manage ISOs</strong> menu. The blaster does no validation of these scripts to ensure they will run successfully, these scripts should be validated prior to uploading.</P>
+  <ul>
+    <li><strong>Add Script</strong> - Upload a new script to the blaster
+    <li><strong>List Scripts</strong> - List all scripts available to the blaster
+  </ul>
+</div>
+{% endblock %}

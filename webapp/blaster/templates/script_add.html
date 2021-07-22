@@ -1,0 +1,27 @@
+{% extends "layout.html" %}
+{% block body %}
+<div class="menu">
+<h1>Manage Scripts</h1>
+<h2>Add New Script</h2>
+<form method="post" enctype=multipart/form-data>
+  <label for="script_file">Script</label>
+  <input type="file" name="file" name="file">
+  <br>
+  <label for="name">Script Name</label>
+  <input type="text" name="name" name="name">
+  <br>
+  <label for="description">Description</label>
+  <input type="text" name="description" name="description">
+  <br>
+  <input type="submit" value="upload">
+</form>
+</div>
+<div class="help_text">
+  <H2>Managing Scripts</H2>
+  <P>This page can be used to upload scripts that can be used for pre- or post- bootstrap operations.</P>
+  <ul>
+    <li><strong>Script Name</strong> - A short name that will be used to uniquely identify the script when associating with ISOs.
+    <li><strong>Description</strong> - A free form description that will appear in the scripts list
+  </ul>
+</div>
+{% endblock %}

@@ -7,3 +7,7 @@ th {
     background-color: #39697C;
     color: white;
 }
+
+#script_view {
+    white-space: pre-wrap;
+}
