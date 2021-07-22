@@ -239,6 +239,7 @@ case ${#IIFS[@]} in
 esac
 
 echo "Using Management interface: $MGMT_IF and blasting interface: $BLASTING_IF"
+echo BLASTING_INTERFACE=$BLASTING_IF > .env
 case $OS in
   1)
     setup_centos_blasting_interface
