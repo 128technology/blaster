@@ -26,14 +26,13 @@ The minimum requirements for the blaster server are 2 cores and 4GB RAM.  It is 
 These instructions are based on a host system installed from a CentOS 1804 image. Since the blaster is mostly docker powered, this should be portable to other OSes. However, the setup script has not been extended to automatically handle all variants. You may try another OS at your own risk by looking at the [legacy installation instructions](docs/INSTALL.md) and modifying for your Linux distro.
 
 To setup the blaster, as root run the following commands:
-````
+```
 yum -y install git
 git clone https://github.com/128technology/blaster.git
 cd blaster
 ./setup.sh
-docker-compose build
-docker-compose up -d
 ```
+
 The setup scripts will attempt to determine your management and blasting interfaces as shown in the drawing above, but please be prepared to indicate the appropriate Linux interfaces connected to each network.
 
 ### Optionally setting a proxy server ###
