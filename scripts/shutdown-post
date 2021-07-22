@@ -1,0 +1,21 @@
+#!/bin/bash
+export LOGFILE=/var/log/128T-bootstrap/post-script.log
+
+echo "Staging rc.local to poweroff the system on the first boot after bootstrapper reboot..." >> $LOGFILE
+########################################################################
+cat 2>> $LOGFILE 1>> /etc/rc.d/rc.local << EOF
+###128T_POST_BOOTSTRAP_ADDED###
+export LOGFILE=$LOGFILE
+echo "Running rc.local on first boot after bootstrap rebooted" >> \$LOGFILE
+# Disable this to avoid running again
+systemctl disable rc-local 2>&1 >> \$LOGFILE
+# Remove executable flag to further ensure we don't run again
+chmod a-x /etc/rc.d/rc.local 2>&1 >> \$LOGFILE
+# Remove our customizations from rc.local
+sed -i '/###128T_POST_BOOTSTRAP_ADDED###/,\$d' /etc/rc.d/rc.local 2>&1 >> \$LOGFILE
+sync;sync
+shutdown
+EOF
+########################################################################
+chmod +x /etc/rc.d/rc.local 2>&1 >> $LOGFILE
+echo "post bootstrap script finished" >> $LOGFILE
