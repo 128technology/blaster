@@ -6,13 +6,13 @@ This software is provided as a 128T Community supported application and is not m
 
 > **Current Release: v1.2, July 22, 2021
 >
-> Updates from v1.1:
-> Introduced database schema versions - no more need to manually handle tables on upgrades (including this one)
-> Allow toggling of ISO post install behavior between default "shutdown" and "reboot" - useful when using a default quickstart
-> Simplified NFS setup - hopefully eliminate any NFS issues mounting ISOs
-> Support for bootstrap scipts - place pre- and/or post- bootstrap scripts into an ISO so they will be run during bootstrapping
-> Docker containers start automatically after a host reboot
-> new setup script - allows for easier turn up of blaster
+> * Updates from v1.1:
+> * Introduced database schema versions - no more need to manually handle tables on upgrades (including this one)
+> * Allow toggling of ISO post install behavior between default "shutdown" and "reboot" - useful when using a default quickstart
+> * Simplified NFS setup - hopefully eliminate any NFS issues mounting ISOs
+> * Support for bootstrap scipts - place pre- and/or post- bootstrap scripts into an ISO so they will be run during bootstrapping
+> * Docker containers start automatically after a host reboot
+> * new setup script - allows for easier turn up of blaster
  
 ## Topology ##
 
