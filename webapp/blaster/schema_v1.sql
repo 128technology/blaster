@@ -5,5 +5,6 @@ CREATE TABLE script (
   name TEXT PRIMARY KEY,
   description TEXT
 );
+INSERT INTO script (name, description)  VALUES ('shutdown-post', 'Sample script to poweroff system after bootstrapping');
 
 PRAGMA user_version = 1;
