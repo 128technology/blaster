@@ -23,7 +23,7 @@ def menu():
 def add():
     if request.method == 'POST':
         name = request.form.get('name')
-        url = request.form.get('url')
+        url = request.form.get('url').strip('/')
         username = request.form.get('username')
         password = request.form.get('password')
 
