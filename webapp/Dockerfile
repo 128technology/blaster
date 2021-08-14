@@ -1,7 +1,7 @@
 FROM centos:7
 
 RUN yum -y install epel-release
-RUN yum -y install python3 openssl redis nfs-utils xorriso
+RUN yum -y install python3 openssl redis nfs-utils xorriso rpcbind
 
 ENV VIRTUAL_ENV=/opt/venv
 RUN python3 -m venv $VIRTUAL_ENV
@@ -27,7 +27,9 @@ COPY setup_scripts.sh /opt/
 RUN systemctl enable celery
 RUN systemctl enable webapp
 RUN systemctl enable redis
-RUN systemctl enable nfs
+RUN systemctl enable rpcbind.service
+RUN systemctl enable rpcbind.socket
+RUN systemctl disable getty@tty1.service
 
 ENV LC_ALL=en_US.UTF-8
 ENV FLASK_APP="blaster.factory"
