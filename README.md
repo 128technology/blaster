@@ -4,8 +4,11 @@ This repository contains files and instructions that can be used to setup a basi
 
 This software is provided as a 128T Community supported application and is not maintained by 128 Technology officially.  Any issues can be reported through this github repository with no guarantee that a fix will be provided and no SLA for any fix timeframes.
 
-> **Current Release: v1.2, July 22, 2021
->
+> **Current Release: v1.2.1, August 16, 2021
+> * Updates from v1.2:
+> * Disable getty in containers to avoid taking over screen on attached monitor/console
+> * Create kickstart pre section to eject USB disks to avoid overwriting devices that force PXE boot
+> 
 > * Updates from v1.1:
 > * Introduced database schema versions - no more need to manually handle tables on upgrades (including this one)
 > * Allow toggling of ISO post install behavior between default "shutdown" and "reboot" - useful when using a default quickstart

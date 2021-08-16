@@ -18,6 +18,9 @@ KS_POST_ADDITIONS = [
     '%include /mnt/install/repo/setup_scripts.sh\n',
     '# Notify blaster this system has completed blasting\n',
     'curl -XPOST http://192.168.128.128/node/add/`dmidecode --string system-serial-number`\n',
+    '%end\n',
+    '%pre\n',
+    '%include /mnt/install/repo/eject_usb_disks.sh\n',
     '%end\n'
 ]
 
@@ -193,6 +196,8 @@ def stage_image(name):
 
     print(f"Setting up snippet to stage bootstrap scripts for image {name}")
     shutil.copyfile(constants.SCRIPT_KS_SNIPPET, nfs_dir / 'setup_scripts.sh')
+    print(f"Setting up snippet to eject USB drives before install for image {name}")
+    shutil.copyfile(constants.EJECT_USB_KS_SNIPPET, nfs_dir / 'eject_usb_disks.sh')
 
     print(f"Updating password hashes for image {name}")
     update_password(name)
