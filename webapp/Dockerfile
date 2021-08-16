@@ -23,6 +23,7 @@ COPY conf.d-celery /etc/conf.d/celery
 COPY proxy.conf /etc/conf.d/proxy.conf
 COPY webapp.service /etc/systemd/system
 COPY setup_scripts.sh /opt/
+COPY eject_usb_disks.sh /opt/
 
 RUN systemctl enable celery
 RUN systemctl enable webapp
