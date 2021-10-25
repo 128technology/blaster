@@ -1,0 +1,17 @@
+#!/bin/bash
+
+cat > /etc/systemd/system/t128-sync-ha-ssh-keys.service <<EOF
+[Unit]
+Description=HA SSH Keys Synchronization
+After=network.target
+
+[Service]
+ExecStart=/usr/sbin/t128-sync-ha-ssh-keys.pyz
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+ln -s /etc/systemd/system/t128-sync-ha-ssh-keys.service /etc/systemd/system/multi-user.target.wants/t128-sync-ha-ssh-keys.service
+base64 -d <<EOF | gunzip -c > /usr/sbin/t128-sync-ha-ssh-keys.pyz
+EOF
