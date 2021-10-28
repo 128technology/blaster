@@ -450,6 +450,12 @@
             <if:name>{{ interface.name }}</if:name>
             <if:dhcp xmlns:if="http://128technology.com/t128/config/interface-config">v4</if:dhcp>
             <if:source-nat xmlns:if="http://128technology.com/t128/config/interface-config">true</if:source-nat>
+            <if:default-route xmlns:if="http://128technology.com/t128/config/interface-config">true</if:default-route>
+            <if:management xmlns:if="http://128technology.com/t128/config/interface-config">true</if:management>
+            <if:management-vector xmlns:if="http://128technology.com/t128/config/interface-config">
+              <if:name>{{ interface.name | lower }}</if:name>
+              <if:priority xmlns:if="http://128technology.com/t128/config/interface-config">{{ priority }}</if:priority>
+            </if:management-vector>
             <if:host-service xmlns:if="http://128technology.com/t128/config/interface-config">
               <if:service-type>ssh</if:service-type>
               <if:id>{{ id }}</if:id>
