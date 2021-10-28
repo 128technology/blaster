@@ -37,7 +37,7 @@ $ sudo umount $target
 
 Details on the bootstrap process can be found [here](https://docs.128technology.com/docs/intro_otp_iso_install).
 
-## Build .pyz Files
+## Build .pyz Files (development only)
 The .pyz files are [compressed python archives](https://docs.python.org/3/library/zipapp.html) (similar to .jar files in the Java universe) which allow to execute the main python script inside the archive, but at the same time split up modules into separate files/folders.
 
 The source code comes with a shell script `create_pyz.bash` that creates the archive from the sources files.
