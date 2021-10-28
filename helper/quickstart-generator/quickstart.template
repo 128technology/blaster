@@ -405,29 +405,8 @@
       <sys:node xmlns:sys="http://128technology.com/t128/config/system-config">
         <sys:name>generic-quickstart-router</sys:name>
         <sys:role xmlns:sys="http://128technology.com/t128/config/system-config">{{ role or 'combo' }}</sys:role>
-        <sys:device-interface xmlns:sys="http://128technology.com/t128/config/system-config">
-          <sys:name>loopback1</sys:name>
-          <sys:id>1</sys:id>
-          <sys:type xmlns:sys="http://128technology.com/t128/config/system-config">host</sys:type>
-          <if:network-interface xmlns:if="http://128technology.com/t128/config/interface-config">
-            <if:name>loopback1</if:name>
-            <if:default-route xmlns:if="http://128technology.com/t128/config/interface-config">true</if:default-route>
-            <if:tenant xmlns:if="http://128technology.com/t128/config/interface-config">_internal_</if:tenant>
-            <if:source-nat xmlns:if="http://128technology.com/t128/config/interface-config">true</if:source-nat>
-            <if:management-vector xmlns:if="http://128technology.com/t128/config/interface-config">
-              <if:priority>100</if:priority>
-              <if:name xmlns:if="http://128technology.com/t128/config/interface-config">loopback1</if:name>
-            </if:management-vector>
-            <if:address xmlns:if="http://128technology.com/t128/config/interface-config">
-              <if:ip-address>169.254.20.1</if:ip-address>
-              <if:prefix-length xmlns:if="http://128technology.com/t128/config/interface-config">30</if:prefix-length>
-              <if:gateway xmlns:if="http://128technology.com/t128/config/interface-config">169.254.20.2</if:gateway>
-            </if:address>
-            <if:global-id>1</if:global-id>
-          </if:network-interface>
-        </sys:device-interface>
         {% for interface in interfaces -%}
-        {% set id = loop.index + 1 -%}
+        {% set id = loop.index -%}
         {% set priority = 100 + loop.index -%}
         <sys:device-interface xmlns:sys="http://128technology.com/t128/config/system-config">
           <sys:name>{{ interface.name }}</sys:name>
