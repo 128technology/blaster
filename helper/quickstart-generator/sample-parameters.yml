@@ -1,0 +1,20 @@
+# the conductor IP address(es) - specify both to connect to an HA conductor
+conductors:
+- 10.0.0.1
+- 10.0.0.2
+
+# network interfaces needed to create the conductor connection - used in this order
+interfaces:
+- name: wan1
+  proto: dhcp
+  pci_address: "0000:00:12.0"
+# - name: wan2
+#   proto: dhcp
+#   pci_address: "0000:00:13.0"
+# - name: lte1
+#   type: lte
+#   target_interface: wwp0s20u5i4
+#   apn: sample-apn
+#   user: jdoe
+#   password: secret
+#   auth: chap
