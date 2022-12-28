@@ -90,7 +90,7 @@ def stage_image(name):
          (nfs_dir / constants.COMBINED_ISO_INTERACTIVE_UEFI_KS_FILE).exists():
         print(f"{name} is a combined ISO based on the kickstart files found")
         combined_iso = True
-    elif (nfs_dir / constants.IBU_INSTALL_SCRIPT).exists()):
+    elif (nfs_dir / constants.IBU_INSTALL_SCRIPT).exists():
         print(f"{name} is an IBU based ISO")
         ibu_iso = True
     else:
@@ -184,7 +184,7 @@ def stage_image(name):
                        "console=ttyS0,115200n81\n",
                      ])
     elif ibu_iso:
-        with open(uefi_pxelinux_dir / name, "w+") as fh:
+        with open(bios_pxelinux_dir / name, "w+") as fh:
             fh.writelines([f"default {name}\n",
                        "timeout 30\n",
                        "\n",
@@ -195,10 +195,8 @@ def stage_image(name):
                       f"label {name}\n",
                       f"  kernel images/{name}/vmlinuz\n",
                       f"  append initrd=images/{name}/initrd.img "
-                      f"inst.stage2=nfs:{constants.NFS_IP}:{ pathlib.Path(constants.IMAGE_FOLDER) / name 
-} "
-                      f"rd.plymouth=0 plymouth.enable=0 --log-level=0 systemd.log_level=0 systemd.show_st
-atus=0 SSRBOOT=iso "
+                      f"inst.stage2=nfs:{constants.NFS_IP}:{ pathlib.Path(constants.IMAGE_FOLDER) / name } "
+                      f"rd.plymouth=0 plymouth.enable=0 --log-level=0 systemd.log_level=0 systemd.show_status=0 SSRBOOT=iso "
                        "console=ttyS0,115200n81\n",
                      ])
     else:
@@ -218,23 +216,25 @@ atus=0 SSRBOOT=iso "
                        "console=ttyS0,115200n81\n",
                      ])
 
-    print(f"Appending new post section to kickstart to post identifier after blast")
-    if combined_iso:
-        with open(nfs_dir / constants.COMBINED_ISO_OTP_UEFI_KS_FILE, 'a') as fh:
-            fh.writelines(KS_POST_ADDITIONS)
-        with open(nfs_dir / constants.COMBINED_ISO_OTP_KS_FILE, 'a') as fh:
-            fh.writelines(KS_POST_ADDITIONS)
-    else:
-        with open(nfs_dir / ks_file, 'a') as fh:
-            fh.writelines(KS_POST_ADDITIONS)
+    if not ibu_iso:
+        print(f"Appending new post section to kickstart to post identifier after blast")
+        if combined_iso:
+            with open(nfs_dir / constants.COMBINED_ISO_OTP_UEFI_KS_FILE, 'a') as fh:
+                fh.writelines(KS_POST_ADDITIONS)
+            with open(nfs_dir / constants.COMBINED_ISO_OTP_KS_FILE, 'a') as fh:
+                fh.writelines(KS_POST_ADDITIONS)
+        else:
+            with open(nfs_dir / ks_file, 'a') as fh:
+                fh.writelines(KS_POST_ADDITIONS)
 
-    print(f"Setting up snippet to stage bootstrap scripts for image {name}")
-    shutil.copyfile(constants.SCRIPT_KS_SNIPPET, nfs_dir / 'setup_scripts.sh')
-    print(f"Setting up snippet to eject USB drives before install for image {name}")
-    shutil.copyfile(constants.EJECT_USB_KS_SNIPPET, nfs_dir / 'eject_usb_disks.sh')
+        print(f"Setting up snippet to stage bootstrap scripts for image {name}")
+        shutil.copyfile(constants.SCRIPT_KS_SNIPPET, nfs_dir / 'setup_scripts.sh')
+        print(f"Setting up snippet to eject USB drives before install for image {name}")
+        shutil.copyfile(constants.EJECT_USB_KS_SNIPPET, nfs_dir / 'eject_usb_disks.sh')
 
-    print(f"Updating password hashes for image {name}")
-    update_password(name)
+        print(f"Updating password hashes for image {name}")
+        update_password(name)
+
     print(f"Image {name} appears to have been setup correctly, updating DB")
     db = get_db()
     db.execute('UPDATE iso SET status = ? WHERE name = ?', ('Ready', name))
