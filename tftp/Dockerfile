@@ -6,6 +6,7 @@ RUN yum -y install tftp-server lighttpd
 RUN systemctl enable tftp.service
 RUN systemctl enable tftp.socket
 RUN systemctl enable lighttpd
+RUN systemctl disable getty@tty1.service
 
 RUN usermod -G root lighttpd
 
