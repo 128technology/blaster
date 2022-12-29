@@ -238,6 +238,13 @@ def stage_image(name):
     print(f"Image {name} appears to have been setup correctly, updating DB")
     db = get_db()
     db.execute('UPDATE iso SET status = ? WHERE name = ?', ('Ready', name))
+    if ibu_iso:
+        db.execute('UPDATE iso SET iso_type = ? WHERE name = ?', ('IBU', name))
+    elif combined_iso:
+        db.execute('UPDATE iso SET iso_type = ? WHERE name = ?', ('COMBINED', name))
+    else:
+        db.execute('UPDATE iso SET iso_type = ? WHERE name = ?', ('LEGACY', name))
+
     db.commit()
 
     return True
