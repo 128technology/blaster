@@ -87,7 +87,7 @@ def add(name=None):
 @bp.route('/list')
 def list():
     db = get_db()
-    isos = db.execute('SELECT id, name, pre_bootstrap_script, post_bootstrap_script, status FROM iso').fetchall()
+    isos = db.execute('SELECT id, name, pre_bootstrap_script, post_bootstrap_script, status, iso_type FROM iso').fetchall()
     scripts = db.execute('SELECT name FROM script').fetchall()
     active = get_active()
     pias={}
