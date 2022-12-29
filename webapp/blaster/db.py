@@ -68,4 +68,9 @@ def init_app(app):
             with current_app.open_resource('schema_v1.sql') as f:
                 db.executescript(f.read().decode('utf8'))
 
+        if user_version < 2:
+            LOG.info("Updating DB schema to v2...")
+            with current_app.open_resource('schema_v2.sql') as f:
+                db.executescript(f.read().decode('utf8'))
+
         db.commit()
